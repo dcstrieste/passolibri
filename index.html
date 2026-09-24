@@ -1,0 +1,1964 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Mercatino dei Libri Usati — ISIS D. Vinci · R. Carli · D. Sandrinelli</title>
+<meta name="description" content="Il mercatino dei libri usati della scuola: compra, prenota e vendi testi scolastici tra studenti." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --arancio:#FF9302; --arancio-scuro:#C96F00;
+  --ciano:#009BE0; --ciano-scuro:#0073A6;
+  --verde:#6CBD01; --verde-scuro:#3F7001;
+  --viola:#8E2595;
+  --carta:#FAF7F1; --avorio:#F3EEE3;
+  --ink:#1B1A17; --ink-soft:#4A463C;
+  --grigio-200:#E9E2D3; --grigio-300:#D9CFBA; --grigio-500:#9A917E;
+  --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,sans-serif;
+  --r-s:8px; --r-m:14px; --r-l:22px;
+  --sh-card:0 1px 2px rgba(27,26,23,.07),0 8px 24px -12px rgba(27,26,23,.16);
+  --ease:cubic-bezier(.22,1,.36,1); --t-fast:150ms; --t-med:250ms;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  font-family:var(--sans);background:var(--carta);color:var(--ink);line-height:1.55;font-size:16px;
+  -webkit-font-smoothing:antialiased;min-height:100%;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+main,header,footer{position:relative;z-index:1}
+img,svg{display:block;max-width:100%}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2.5px solid var(--ciano);outline-offset:2px;border-radius:4px}
+h1,h2,h3,.serif{font-family:var(--serif);font-weight:600;line-height:1.1;letter-spacing:-.01em}
+.h-page{font-size:clamp(1.8rem,3.6vw,2.5rem);font-weight:640}
+.h-card{font-size:1.08rem;font-weight:600}
+.price{font-family:var(--serif);font-style:italic;font-weight:600}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;color:var(--arancio-scuro);display:inline-flex;align-items:center;gap:.5rem}
+.lead{font-size:.98rem;color:var(--ink-soft);max-width:60ch}
+.container{width:min(1180px,100% - 2.5rem);margin-inline:auto}
+.muted{color:var(--ink-soft)}
+.small{font-size:.82rem}
+.center{text-align:center}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.78rem 1.4rem;border-radius:999px;font-weight:600;font-size:.92rem;text-decoration:none;transition:transform var(--t-fast) var(--ease),box-shadow var(--t-fast) var(--ease),background-color var(--t-fast),color var(--t-fast),border-color var(--t-fast)}
+.btn-primary{background:var(--arancio);color:var(--ink);box-shadow:0 6px 18px -8px rgba(201,111,0,.5)}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-ghost{border:1.5px solid var(--ciano);color:var(--ciano-scuro);background:transparent}
+.btn-ghost:hover{background:rgba(0,155,224,.08)}
+.btn-viola{background:var(--viola);color:#fff}
+.btn-viola:hover{transform:translateY(-2px)}
+.btn-outline{border:1.5px solid var(--grigio-300);color:var(--ink)}
+.btn-outline:hover{border-color:var(--ink)}
+.btn-sm{padding:.48rem 1rem;font-size:.82rem}
+.btn-block{width:100%}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn-google{background:#fff;color:var(--ink);border:1.5px solid var(--grigio-300);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.btn-google:hover{border-color:var(--grigio-500)}
+.link-btn{color:var(--ciano-scuro);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(250,247,241,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--grigio-200);padding-top:env(safe-area-inset-top,0px)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;gap:1rem}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;flex:none}
+.brand-mark{width:36px;height:36px;border-radius:10px;background:var(--arancio);display:grid;place-items:center;box-shadow:0 4px 10px -4px rgba(201,111,0,.5)}
+.brand-name{font-family:var(--serif);font-weight:640;font-size:1rem;line-height:1.1}
+.brand-name small{display:block;font-family:var(--sans);font-weight:500;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--grigio-500)}
+.nav-links{display:flex;align-items:center;gap:.2rem;list-style:none;flex:1;flex-wrap:wrap;overflow:visible}
+.nav-links button{white-space:nowrap;padding:.5rem .85rem;font-weight:600;font-size:.86rem;border-radius:999px;color:var(--ink-soft);transition:background-color var(--t-fast),color var(--t-fast)}
+.nav-links button:hover{background:var(--avorio);color:var(--ink)}
+.nav-links button[aria-current="true"]{background:var(--ink);color:var(--carta)}
+.nav-right{display:flex;align-items:center;gap:.6rem;flex:none}
+.avatar-btn{width:36px;height:36px;border-radius:50%;background:var(--viola);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.76rem;transition:transform var(--t-fast)}
+.avatar-btn:hover{transform:scale(1.06)}
+.role-pill{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .55rem;border-radius:999px;background:var(--viola);color:#fff}
+.hamburger{display:none;flex-direction:column;gap:5px;padding:.5rem}
+.hamburger span{width:20px;height:2px;background:var(--ink);border-radius:2px}
+
+/* NAV DROPDOWN */
+.nav-dropdown{position:relative}
+.nav-dropdown-toggle{display:inline-flex;align-items:center;gap:.3rem}
+.nav-dropdown-toggle svg{transition:transform var(--t-fast) var(--ease)}
+.nav-dropdown.open .nav-dropdown-toggle svg{transform:rotate(180deg)}
+.nav-dropdown-toggle[aria-current="true"]{background:var(--ink);color:var(--carta)}
+.nav-dropdown-menu{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);box-shadow:var(--sh-card);padding:.4rem;min-width:220px;display:none;flex-direction:column;gap:.1rem;z-index:60;list-style:none}
+.notif-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--arancio-scuro);margin-left:.4rem;vertical-align:middle}
+.notif-dot[hidden]{display:none}
+.nav-dropdown.open .nav-dropdown-menu{display:flex}
+.nav-dropdown-menu button{width:100%;text-align:left;border-radius:var(--r-s)!important;padding:.6rem .75rem}
+
+section{padding-block:clamp(2rem,5vw,3.2rem)}
+.view{display:none}
+.view.active{display:block}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:1.6rem}
+
+/* HERO banner (mini) */
+.mini-hero{background:linear-gradient(120deg,rgba(255,147,2,.13),rgba(0,155,224,.08));border-bottom:1px solid var(--grigio-200);padding-block:2.4rem}
+.mini-hero h1{font-size:clamp(1.9rem,4vw,2.7rem)}
+.stat-row{display:flex;gap:2rem;margin-top:1.2rem;flex-wrap:wrap}
+.stat-row .stat b{font-family:var(--serif);font-size:1.5rem;display:block;line-height:1}
+.stat-row .stat span{font-size:.76rem;color:var(--ink-soft)}
+
+/* FILTERS */
+.filterbar{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-l);padding:1rem 1.1rem;box-shadow:var(--sh-card);display:flex;flex-wrap:wrap;gap:.7rem;align-items:center}
+.filterbar .search-wrap{position:relative;flex:1 1 220px}
+.filterbar .search-wrap svg{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--grigio-500)}
+.search-input{width:100%;padding:.7rem 1rem .7rem 2.6rem;border-radius:999px;border:1.5px solid var(--grigio-200);background:var(--carta)}
+.search-input:focus{outline:none;border-color:var(--ciano)}
+.filterbar select,.filterbar input[type=number]{padding:.62rem .9rem;border-radius:999px;border:1.5px solid var(--grigio-200);background:var(--carta);font-size:.85rem;min-width:120px}
+.chip{padding:.45rem .9rem;border-radius:999px;font-size:.8rem;font-weight:600;border:1.5px solid var(--grigio-300);background:transparent;color:var(--ink-soft)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--carta)}
+
+/* BOOK CARD */
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.4rem;margin-top:1.6rem}
+.book-card{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:transform var(--t-med) var(--ease),box-shadow var(--t-med) var(--ease)}
+.book-card:hover{transform:translateY(-3px);box-shadow:var(--sh-card)}
+.cover{aspect-ratio:3/4;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:1rem;color:#fff}
+.cover-initial{font-family:var(--serif);font-style:italic;font-weight:300;font-size:3rem;opacity:.85}
+.cover-title{font-family:var(--serif);font-weight:600;font-size:.98rem;line-height:1.25;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 6px rgba(0,0,0,.25)}
+.cover-materia{font-size:.64rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.price-tag{position:absolute;bottom:.8rem;right:.8rem;background:var(--carta);color:var(--ink);padding:.38rem .8rem .38rem 1.1rem;clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 50%);box-shadow:0 3px 8px rgba(0,0,0,.22);transform:rotate(-4deg);font-size:1rem}
+.badge-cond{position:absolute;top:.7rem;right:-1px;font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.3rem .7rem .3rem .9rem;color:var(--ink);clip-path:polygon(9px 0,100% 0,100% 100%,9px 100%,0 50%)}
+.badge-cond.ot{background:var(--verde)}.badge-cond.bu{background:var(--ciano)}.badge-cond.di{background:var(--avorio)}
+.book-info{padding:.9rem 1rem 1rem;display:flex;flex-direction:column;gap:.3rem;flex:1}
+.book-info .h-card{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:1rem}
+.book-author{font-size:.8rem;color:var(--ink-soft)}
+.book-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:.5rem}
+.book-foot .price{font-size:1.15rem;color:var(--arancio-scuro)}
+
+.badge{display:inline-flex;align-items:center;gap:.32rem;font-size:.66rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.28rem .7rem;border-radius:999px;line-height:1}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.badge.disponibile{background:rgba(108,189,1,.18);color:var(--verde-scuro)}
+.badge.prenotato{background:rgba(142,37,149,.16);color:var(--viola)}
+.badge.confermato{background:rgba(0,155,224,.16);color:var(--ciano-scuro)}
+.badge.completato,.badge.venduto,.badge.scambiocompletato{background:var(--grigio-200);color:var(--ink-soft)}
+.badge.annullato,.badge.disattivato{background:transparent;border:1.5px dashed var(--grigio-500);color:var(--grigio-500)}
+.badge.aperta{background:rgba(255,147,2,.18);color:var(--arancio-scuro)}
+.badge.in_lavorazione{background:rgba(0,155,224,.16);color:var(--ciano-scuro)}
+.badge.risolta{background:rgba(108,189,1,.18);color:var(--verde-scuro)}
+
+.empty{text-align:center;padding:3.2rem 1rem;border:1.5px dashed var(--grigio-300);border-radius:var(--r-l);margin-top:1.6rem;color:var(--ink-soft)}
+.empty svg{margin:0 auto .8rem;color:var(--grigio-500)}
+
+/* CARD / FORM */
+.card{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-l);padding:clamp(1.2rem,3vw,1.8rem);box-shadow:var(--sh-card)}
+.doc-content{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-l);padding:clamp(1.2rem,3vw,1.8rem);box-shadow:var(--sh-card)}
+.doc-content h2{font-family:var(--serif,inherit);font-size:1.05rem;margin:1.6rem 0 .6rem;color:var(--ink)}
+.doc-content h2:first-child{margin-top:0}
+.doc-content p{color:var(--ink-soft);line-height:1.6;margin-bottom:.6rem}
+.doc-content ul{margin:0 0 .8rem 1.1rem;color:var(--ink-soft);line-height:1.6}
+.doc-content li{margin-bottom:.3rem}
+.highlight-box{background:var(--avorio);border:1px solid var(--grigio-200);border-radius:var(--r-m);padding:.9rem 1.1rem;margin:.8rem 0}
+.highlight-box p{margin-bottom:0;color:var(--ink)}
+.field{margin-bottom:1.05rem}
+.field label{display:block;font-weight:600;font-size:.84rem;margin-bottom:.35rem}
+.field label .req{color:var(--arancio-scuro)}
+.input,.select,.textarea{width:100%;padding:.75rem .95rem;border-radius:var(--r-s);border:1.5px solid var(--grigio-300);background:#fff}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--ciano);box-shadow:0 0 0 3px rgba(0,155,224,.16)}
+.field-hint{font-size:.78rem;color:var(--ink-soft);margin-top:.3rem}
+.field.error .input,.field.error .select{border-color:var(--arancio);box-shadow:0 0 0 3px rgba(255,147,2,.18)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 1rem}
+.check-row{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem 0}
+.check-row input{margin-top:.2rem;flex:none}
+.chip-input-row{display:flex;gap:.5rem;margin-bottom:.6rem}
+.chip-input-row .input{flex:1}
+.tag-list{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem}
+.tag{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .5rem .35rem .85rem;border-radius:999px;background:rgba(0,155,224,.1);border:1px solid rgba(0,155,224,.35);color:var(--ciano-scuro);font-size:.8rem;font-weight:600}
+.tag button{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(0,155,224,.2)}
+.slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.45rem;max-height:220px;overflow-y:auto;padding:.2rem;border:1px solid var(--grigio-200);border-radius:var(--r-s);background:var(--carta)}
+.slot-chip{padding:.4rem .3rem;text-align:center;font-size:.78rem;font-weight:600;border-radius:var(--r-s);border:1.5px solid var(--grigio-300);color:var(--ink-soft);background:#fff}
+.slot-chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--carta)}
+.pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+.pay-opt{display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;border:1.5px solid var(--grigio-300);border-radius:var(--r-s);font-size:.85rem;font-weight:600}
+.pay-opt input{flex:none}
+.form-ok{display:none;align-items:flex-start;gap:.5rem;background:rgba(108,189,1,.15);border:1px solid rgba(108,189,1,.5);color:var(--verde-scuro);font-weight:600;font-size:.86rem;padding:.8rem 1rem;border-radius:var(--r-s);margin-bottom:1.1rem}
+.form-ok.show{display:flex}
+.section-title{font-family:var(--serif);font-size:1.15rem;font-weight:640;margin:1.4rem 0 .6rem}
+.section-title:first-child{margin-top:0}
+
+/* GUARD / LOCK */
+.guard-card{max-width:420px;margin:2rem auto;text-align:center}
+.guard-card svg{margin:0 auto .8rem;color:var(--viola)}
+
+/* LOGIN CHOOSER */
+.account-list{display:flex;flex-direction:column;gap:.5rem;margin:1rem 0}
+.account-item{display:flex;align-items:center;gap:.8rem;padding:.7rem .9rem;border:1.5px solid var(--grigio-200);border-radius:var(--r-m);text-align:left;width:100%;transition:border-color var(--t-fast),background-color var(--t-fast)}
+.account-item:hover{border-color:var(--ciano);background:rgba(0,155,224,.05)}
+.account-avatar{width:36px;height:36px;border-radius:50%;background:var(--ciano);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.78rem;flex:none}
+.account-name{font-weight:600;font-size:.9rem}
+.account-email{font-size:.78rem;color:var(--ink-soft)}
+.divider-or{display:flex;align-items:center;gap:.7rem;color:var(--grigio-500);font-size:.78rem;margin:1rem 0}
+.divider-or::before,.divider-or::after{content:"";flex:1;height:1px;background:var(--grigio-300)}
+
+/* TABLE */
+.tabs{display:flex;gap:.3rem;border-bottom:2px solid var(--grigio-200);flex-wrap:wrap}
+.tab{padding:.65rem 1rem;font-weight:600;font-size:.86rem;color:var(--ink-soft);border-bottom:2.5px solid transparent;margin-bottom:-2px}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--arancio)}
+.tab .count{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--avorio);font-size:.66rem;margin-left:.35rem}
+.tab[aria-selected="true"] .count{background:var(--arancio)}
+.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);margin-top:.8rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem;min-width:560px}
+th{text-align:left;padding:.7rem .9rem;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--grigio-200);background:var(--carta)}
+td{padding:.7rem .9rem;border-bottom:1px solid var(--grigio-200);vertical-align:middle}
+tbody tr:hover{background:rgba(255,147,2,.05)}
+.row-actions{display:flex;gap:.35rem;flex-wrap:wrap}
+.icon-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.38rem .75rem;border-radius:999px;font-size:.74rem;font-weight:600;border:1.5px solid var(--grigio-300);white-space:nowrap}
+.icon-btn.ok{border-color:rgba(108,189,1,.6);color:var(--verde-scuro)}
+.icon-btn.ok:hover{background:rgba(108,189,1,.15)}
+.icon-btn.warn{border-color:rgba(142,37,149,.5);color:var(--viola)}
+.icon-btn.warn:hover{background:rgba(142,37,149,.1)}
+.icon-btn.danger{border-color:var(--grigio-300);color:var(--ink-soft)}
+.icon-btn.danger:hover{background:var(--ink);color:var(--carta);border-color:var(--ink)}
+
+/* stat cards */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.8rem;margin-bottom:1.4rem}
+.stat-card{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);padding:1rem 1.1rem}
+.stat-card b{font-family:var(--serif);font-size:1.6rem;display:block;line-height:1}
+.stat-card span{font-size:.74rem;color:var(--ink-soft)}
+
+/* booking / reservation cards */
+.res-card{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);padding:1rem 1.1rem;margin-bottom:.8rem}
+.res-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem}
+.res-meta{font-size:.82rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:.3rem 1rem;margin:.4rem 0}
+.confirm-track{display:flex;gap:1rem;font-size:.8rem;margin:.5rem 0}
+.confirm-track span{display:flex;align-items:center;gap:.35rem}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--grigio-300);display:inline-block}
+.dot.on{background:var(--verde)}
+
+/* MODAL */
+.modal-backdrop{position:fixed;inset:0;z-index:100;background:rgba(27,26,23,.45);backdrop-filter:blur(8px);display:grid;place-items:center;padding:1.2rem;opacity:0;pointer-events:none;transition:opacity var(--t-med) var(--ease)}
+.modal-backdrop.open{opacity:1;pointer-events:auto}
+.modal{background:var(--carta);border-radius:var(--r-l);width:min(560px,100%);max-height:88vh;overflow:auto;box-shadow:0 30px 80px -20px rgba(27,26,23,.5);transform:translateY(20px) scale(.97);transition:transform var(--t-med) var(--ease)}
+.modal-backdrop.open .modal{transform:translateY(0) scale(1)}
+.modal-head{padding:1.2rem 1.4rem;border-bottom:1px solid var(--grigio-200);display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;border-top:5px solid var(--arancio)}
+.modal-head.info{border-top-color:var(--ciano)}
+.modal-head.viola{border-top-color:var(--viola)}
+.modal-head.warn{border-top-color:var(--arancio-scuro)}
+.modal-close{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--avorio);flex:none}
+.modal-close:hover{background:var(--grigio-200)}
+.modal-body{padding:1.4rem}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:.3rem 1rem;font-size:.88rem;margin-top:.6rem}
+.dl dt{font-weight:600;color:var(--ink-soft)}
+.dl dd{margin:0}
+
+/* TOAST */
+.toast-stack{position:fixed;top:calc(76px + env(safe-area-inset-top,0px));right:1.2rem;z-index:200;display:flex;flex-direction:column;gap:.6rem;pointer-events:none}
+.toast{display:flex;align-items:center;gap:.6rem;pointer-events:auto;background:var(--ink);color:var(--carta);padding:.8rem 1.1rem;border-radius:var(--r-m);font-size:.86rem;font-weight:500;box-shadow:0 14px 34px -10px rgba(27,26,23,.5);border-left:4px solid var(--ciano);max-width:320px;animation:toastIn .3s var(--ease)}
+.toast.success{border-left-color:var(--verde)}
+.toast.warn{border-left-color:var(--viola)}
+.toast.brand{border-left-color:var(--arancio)}
+.toast.out{animation:toastOut .3s var(--ease) forwards}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateX(40px)}}
+
+footer{background:var(--ink);color:var(--carta);margin-top:2.4rem;padding-bottom:env(safe-area-inset-bottom,0px)}
+.school-credit{padding-block:1.2rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:space-between;font-size:.78rem;opacity:.85}
+.school-credit b{font-family:var(--serif);color:var(--arancio);font-weight:600}
+
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){}}
+
+@media (max-width:900px){
+  .form-grid{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .nav-links.open{display:flex;position:fixed;inset:64px 0 auto 0;flex-direction:column;align-items:stretch;background:var(--carta);border-bottom:1px solid var(--grigio-200);padding:.6rem 1.2rem 1.2rem;box-shadow:0 20px 30px -18px rgba(27,26,23,.25);z-index:49}
+  .nav-links.open button{text-align:left;border-radius:var(--r-s)}
+  .catalog-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem}
+  .nav-links.open .nav-dropdown-toggle svg{display:none}
+  .nav-links.open .nav-dropdown-menu{position:static;display:flex!important;box-shadow:none;border:none;padding:0 0 0 1rem;margin-bottom:.2rem}
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="#" class="brand" id="brand-link">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#1B1A17" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg>
+      </span>
+      <span class="brand-name">Mercatino dei Libri<small>Usati · tra studenti</small></span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-expanded="false" aria-label="Apri menu"><span></span><span></span><span></span></button>
+    <ul class="nav-links" id="nav-links" role="tablist" aria-label="Sezioni">
+      <li><button data-view="catalogo">Catalogo</button></li>
+      <li class="nav-dropdown" id="nav-dd-annunci">
+        <button type="button" class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">Annunci<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <ul class="nav-dropdown-menu" role="menu">
+          <li><button data-view="vendi">Inserisci annuncio</button></li>
+          <li><button data-view="miei-annunci">I miei annunci</button></li>
+        </ul>
+      </li>
+      <li class="nav-dropdown" id="nav-dd-prenotazioni">
+        <button type="button" class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">Prenotazioni<span class="notif-dot" id="notif-dot-toggle" hidden></span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <ul class="nav-dropdown-menu" role="menu">
+          <li><button data-view="prenotazioni">Le mie prenotazioni<span class="notif-dot" id="notif-dot-acquirente" hidden></span></button></li>
+          <li><button data-view="pren-ricevute">Prenotazioni ricevute<span class="notif-dot" id="notif-dot-item" hidden></span></button></li>
+        </ul>
+      </li>
+      <li><button data-view="assistenza">Assistenza</button></li>
+      <li class="nav-dropdown" id="nav-dd-informazioni">
+        <button type="button" class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false">Informazioni<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+        <ul class="nav-dropdown-menu" role="menu">
+          <li><button data-view="regolamento" data-reg-tab="regolamento">Regolamento Mercatino</button></li>
+          <li><button data-view="regolamento" data-reg-tab="privacy">Privacy</button></li>
+        </ul>
+      </li>
+      <li id="nav-admin-item" hidden><button data-view="admin">Area Admin</button></li>
+    </ul>
+    <div class="nav-right">
+      <span class="role-pill" id="role-pill" hidden></span>
+      <button class="avatar-btn" id="avatar-btn" aria-label="Account" title="Account">?</button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ============ CATALOGO ============ -->
+  <section class="view" id="view-catalogo">
+    <div id="catalogo-guard"></div>
+    <div id="catalogo-body" hidden>
+    <div class="mini-hero">
+      <div class="container">
+        <span class="eyebrow">Il mercatino della scuola</span>
+        <h1 class="h-page" style="margin-top:.5rem">Sfoglia i libri in bacheca.</h1>
+        <p class="lead" style="margin-top:.5rem">Compra e vendi testi scolastici tra studenti. Il pagamento avviene sempre di persona, a scuola: la piattaforma non gestisce alcun pagamento.</p>
+      </div>
+    </div>
+    <div class="container">
+      <div class="filterbar" style="margin-top:1.6rem">
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" class="search-input" id="f-search" placeholder="Cerca per titolo o autore…" />
+        </div>
+        <select id="f-classe"><option value="">Tutte le classi</option></select>
+        <select id="f-materia"><option value="">Tutte le materie</option></select>
+        <select id="f-stato">
+          <option value="disponibile">Solo disponibili</option>
+          <option value="">Tutti gli stati</option>
+          <option value="prenotato">Prenotati</option>
+        </select>
+        <input type="number" id="f-prezzo" placeholder="Prezzo max €" min="0" style="width:130px" />
+      </div>
+      <div class="catalog-grid" id="catalog-grid"></div>
+    </div>
+    </div>
+  </section>
+
+  <!-- ============ DETTAGLIO ============ -->
+  <section class="view" id="view-dettaglio">
+    <div class="container" style="max-width:820px">
+      <button class="btn btn-outline btn-sm" data-view="catalogo" style="margin-bottom:1rem">← Torna al catalogo</button>
+      <div class="card" id="dettaglio-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ VENDI ============ -->
+  <section class="view" id="view-vendi">
+    <div class="container" style="max-width:720px">
+      <div class="page-head">
+        <div><span class="eyebrow">Area venditore</span><h1 class="h-page" style="margin-top:.4rem">Metti in vendita un libro.</h1></div>
+      </div>
+      <div id="vendi-guard"></div>
+      <form class="card" id="sell-form" hidden novalidate>
+        <div class="form-ok" id="sell-ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Annuncio pubblicato! È subito visibile in bacheca. Puoi scaricare la ricevuta dalla sezione «I miei annunci».</span></div>
+
+        <div class="section-title">1. Classe e libro adottato</div>
+        <div class="form-grid">
+          <div class="field"><label for="s-classe">Classe <span class="req">*</span></label>
+            <select class="select" id="s-classe"><option value="">Scegli la tua classe…</option></select>
+          </div>
+          <div class="field"><label for="s-libro">Libro di testo adottato <span class="req">*</span></label>
+            <select class="select" id="s-libro"><option value="">Scegli prima la classe…</option></select>
+          </div>
+        </div>
+        <p class="field-hint" id="s-libro-hint" style="margin:-.5rem 0 1rem"></p>
+
+        <div class="section-title">2. Condizione e prezzo</div>
+        <div class="form-grid">
+          <div class="field"><label for="s-condizione">Condizione <span class="req">*</span></label>
+            <select class="select" id="s-condizione"><option value="">Scegli…</option><option>Ottima</option><option>Buona</option><option>Discreta</option><option>Usurata</option></select>
+          </div>
+          <div class="field"><label for="s-prezzo">Prezzo (€) <span class="req">*</span></label>
+            <input class="input" id="s-prezzo" type="number" min="1" max="80" step="0.5" placeholder="Es. 12" />
+          </div>
+        </div>
+
+        <div class="section-title">3. Incontro per lo scambio</div>
+        <div class="form-grid">
+          <div class="field"><label for="s-sede">Sede <span class="req">*</span></label>
+            <select class="select" id="s-sede"><option value="">Scegli la sede…</option><option>Veronese</option><option>Diaz</option></select>
+          </div>
+          <div class="field"><label for="s-luogo">Luogo di scambio <span class="req">*</span></label>
+            <select class="select" id="s-luogo"><option value="">Scegli il luogo…</option><option>Atrio</option><option>Bar</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Date disponibili <span class="req">*</span></label>
+          <input class="input" id="s-data-input" type="date" />
+          <div class="tag-list" id="s-date-list" style="margin-top:.6rem"></div>
+          <p class="field-hint">Ogni data scelta viene aggiunta automaticamente all'elenco qui sopra: puoi selezionarne più di una.</p>
+        </div>
+        <div class="field"><label>Orari disponibili (griglia 07:00–17:00, ogni 30 minuti) <span class="req">*</span></label>
+          <div class="slot-grid" id="s-orari-grid"></div>
+        </div>
+
+        <div class="section-title">4. Metodi di pagamento accettati</div>
+        <p class="field-hint" style="margin-top:-.3rem;margin-bottom:.6rem">Il pagamento avviene sempre direttamente tra voi, di persona: la piattaforma non lo gestisce mai.</p>
+        <div class="pay-grid" id="s-pagamenti">
+          <label class="pay-opt"><input type="checkbox" value="Contanti" /> Contanti</label>
+          <label class="pay-opt"><input type="checkbox" value="Postepay" /> Postepay</label>
+          <label class="pay-opt"><input type="checkbox" value="PayPal" /> PayPal</label>
+          <label class="pay-opt"><input type="checkbox" value="Altro online" /> Altro online</label>
+        </div>
+
+        <div class="section-title">5. Regolamento</div>
+        <label class="check-row"><input type="checkbox" id="s-regolamento" /><span>Ho letto e accetto il <button type="button" class="link-btn" id="open-regolamento" style="background:none;border:none;padding:0">regolamento del mercatino</button>. <span class="req">*</span></span></label>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:.6rem">Pubblica annuncio</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ I MIEI ANNUNCI ============ -->
+  <section class="view" id="view-miei-annunci">
+    <div class="container">
+      <div class="page-head"><div><span class="eyebrow">Area venditore</span><h1 class="h-page" style="margin-top:.4rem">I miei annunci.</h1></div></div>
+      <div id="miei-annunci-guard"></div>
+      <div id="miei-annunci-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ LE MIE PRENOTAZIONI ============ -->
+  <section class="view" id="view-prenotazioni">
+    <div class="container">
+      <div class="page-head"><div><span class="eyebrow">Acquisti</span><h1 class="h-page" style="margin-top:.4rem">Le mie prenotazioni.</h1></div></div>
+      <div id="prenotazioni-guard"></div>
+      <div id="prenotazioni-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ PRENOTAZIONI RICEVUTE ============ -->
+  <section class="view" id="view-pren-ricevute">
+    <div class="container">
+      <div class="page-head"><div><span class="eyebrow">Area venditore</span><h1 class="h-page" style="margin-top:.4rem">Prenotazioni ricevute.</h1></div></div>
+      <div id="pren-ricevute-guard"></div>
+      <div id="pren-ricevute-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ ASSISTENZA ============ -->
+  <section class="view" id="view-assistenza">
+    <div class="container" style="max-width:640px">
+      <div class="page-head"><div><span class="eyebrow">Serve aiuto?</span><h1 class="h-page" style="margin-top:.4rem">Assistenza.</h1></div></div>
+      <div id="assistenza-guard"></div>
+      <div id="assistenza-body" hidden>
+        <form class="card" id="segnalazione-form" novalidate>
+          <div class="form-ok" id="segnalazione-ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><span>Segnalazione inviata. Il team la prenderà in carico.</span></div>
+          <div class="field"><label for="seg-categoria">Tipo di problema <span class="req">*</span></label>
+            <select class="select" id="seg-categoria">
+              <option value="">Scegli una categoria…</option>
+              <option>Annunci</option><option>ISBN</option><option>Contenuti</option>
+              <option>Prenotazioni</option><option>Account</option><option>Problemi tecnici</option>
+            </select>
+            <p class="field-hint">Scegli la categoria più vicina al tuo problema: non è previsto testo libero, così il team può smistare le richieste più in fretta.</p>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Invia segnalazione</button>
+        </form>
+        <div class="section-title">Le mie segnalazioni</div>
+        <div id="segnalazioni-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REGOLAMENTO / PRIVACY ============ -->
+  <section class="view" id="view-regolamento">
+    <div class="container" style="max-width:760px">
+      <div class="page-head" style="flex-wrap:wrap;gap:.8rem">
+        <div><span class="eyebrow">Informazioni</span><h1 class="h-page" style="margin-top:.4rem" id="reg-titolo">Regolamento del mercatino.</h1></div>
+      </div>
+
+      <div id="reg-content-regolamento" class="doc-content">
+        <h2>1. Finalità del Mercatino</h2>
+        <p>Il Mercatino Libri Usati Scuola è una piattaforma digitale che facilita l'incontro tra studenti che desiderano cedere o acquistare libri scolastici usati. La piattaforma non gestisce direttamente alcuna transazione economica e non si pone come soggetto commerciale tra le parti.</p>
+        <p>La scuola mette a disposizione la piattaforma come servizio di supporto alla comunità scolastica, senza alcuna responsabilità sulla qualità dei libri trattati o sulle transazioni tra privati.</p>
+
+        <h2>2. Chi può partecipare</h2>
+        <ul>
+          <li>Studenti iscritti o precedentemente iscritti all'istituto</li>
+          <li>Familiari di studenti iscritti, limitatamente alla vendita di libri già utilizzati nell'istituto</li>
+          <li>La partecipazione è soggetta ad approvazione dell'account da parte dell'amministratore</li>
+        </ul>
+
+        <h2>3. Responsabilità degli utenti</h2>
+        <p>Chi pubblica un annuncio si impegna a:</p>
+        <ul>
+          <li>Selezionare correttamente il libro dall'elenco dei testi adottati per la propria classe</li>
+          <li>Indicare onestamente le condizioni del libro</li>
+          <li>Presentarsi puntuale all'appuntamento confermato</li>
+          <li>Comunicare tempestivamente eventuali rinunce o indisponibilità</li>
+        </ul>
+
+        <h2>4. Elenco dei libri di testo</h2>
+        <p>L'elenco dei libri adottati per ogni classe e sezione è predefinito dalla piattaforma sulla base delle adozioni ufficiali della scuola. In fase di pubblicazione dell'annuncio lo studente seleziona il proprio libro dall'elenco, così da garantire dati corretti (materia, autore, titolo, volume, editore, ISBN).</p>
+
+        <h2>5. Stato del libro</h2>
+        <p>Lo stato del libro deve essere indicato onestamente tra le categorie disponibili:</p>
+        <ul>
+          <li><strong>Ottimo</strong> — praticamente nuovo, nessuna o pochissima sottolineatura</li>
+          <li><strong>Buono</strong> — alcune sottolineature a matita o evidenziatore, nessun danno strutturale</li>
+          <li><strong>Discreto</strong> — uso evidente, pagine integre e leggibili</li>
+          <li><strong>Usurato</strong> — molte annotazioni, copertina con segni, comunque consultabile</li>
+        </ul>
+
+        <h2>6. Scambio a scuola</h2>
+        <div class="highlight-box"><p>⚠️ Tutti gli scambi devono avvenire all'interno del perimetro scolastico, nei luoghi indicati dalla piattaforma. Non sono consentiti scambi in luoghi esterni alla scuola.</p></div>
+        <p>I luoghi di scambio disponibili sono selezionabili durante la prenotazione. Si raccomanda di scegliere spazi aperti e visibili, preferibilmente durante l'orario scolastico.</p>
+
+        <h2>7. Pagamento</h2>
+        <div class="highlight-box"><p>💶 Il pagamento avviene con il metodo indicato dal venditore nell'annuncio (contanti, Postepay, PayPal o altro metodo online), direttamente tra venditore e acquirente. La piattaforma non gestisce né media alcun pagamento in nessun caso: la scelta del metodo, l'esecuzione e la verifica del pagamento restano sempre un accordo diretto tra le due parti, sotto la loro responsabilità.</p></div>
+        <p>Si raccomanda di verificare l'avvenuto accredito prima di consegnare il libro, in particolare quando si utilizza un metodo di pagamento online.</p>
+
+        <h2>8. Prenotazioni e cancellazioni</h2>
+        <ul>
+          <li>Una prenotazione impegna sia l'acquirente sia il venditore</li>
+          <li>In caso di impossibilità, la cancellazione deve essere comunicata almeno 24 ore prima</li>
+          <li>Cancellazioni ripetute senza preavviso possono portare alla sospensione dell'account</li>
+        </ul>
+
+        <h2>9. Contenuti vietati</h2>
+        <ul>
+          <li>Non è consentito pubblicare annunci duplicati per lo stesso volume</li>
+          <li>Sono vietati annunci con informazioni false o fuorvianti</li>
+          <li>Non è consentito condividere dati personali (telefono, indirizzo) negli annunci pubblici</li>
+        </ul>
+
+        <h2>10. Moderazione e segnalazioni</h2>
+        <p>L'amministratore della piattaforma può rimuovere annunci non conformi al regolamento. Gli utenti possono segnalare contenuti inappropriati o errori tramite la sezione Assistenza. Le segnalazioni vengono valutate entro 2 giorni lavorativi.</p>
+
+        <h2>11. Accettazione del regolamento</h2>
+        <p>L'utilizzo della piattaforma implica l'accettazione integrale del presente regolamento. Il mancato rispetto può comportare la sospensione o la rimozione dell'account.</p>
+
+        <p style="margin-top:2rem;font-size:.82rem;color:var(--grigio-500)">Regolamento aggiornato: Giugno 2025 · Versione 1.0</p>
+      </div>
+
+      <div id="reg-content-privacy" class="doc-content" hidden>
+        <div class="highlight-box"><p>🔒 Questa piattaforma raccoglie solo i dati strettamente necessari al suo funzionamento. Nessun dato personale viene reso pubblico agli altri utenti al di fuori di quanto necessario per lo scambio.</p></div>
+
+        <h2>1. Titolare del trattamento</h2>
+        <p>Il titolare del trattamento è l'ISIS d. Vinci – R. Carli – d. Sandrinelli, in qualità di soggetto che gestisce la piattaforma a scopo non commerciale.</p>
+
+        <h2>2. Dati raccolti</h2>
+        <p>La piattaforma raccoglie esclusivamente:</p>
+        <ul>
+          <li>Nome, cognome, classe e indirizzo scolastico</li>
+          <li>Indirizzo email istituzionale (ad accesso limitato)</li>
+          <li>Dati relativi agli annunci pubblicati (libro, prezzo, stato)</li>
+          <li>Dati relativi alle prenotazioni e agli appuntamenti</li>
+        </ul>
+        <p><strong>Non vengono raccolti</strong> numeri di telefono, indirizzi fisici, documenti d'identità o dati bancari di alcun tipo.</p>
+
+        <h2>3. Finalità del trattamento</h2>
+        <p>I dati vengono trattati esclusivamente per:</p>
+        <ul>
+          <li>Consentire la pubblicazione e la ricerca di annunci di libri scolastici</li>
+          <li>Gestire le prenotazioni tra studenti</li>
+          <li>Organizzare gli appuntamenti di scambio a scuola</li>
+          <li>Inviare comunicazioni relative alle prenotazioni effettuate</li>
+          <li>Moderare i contenuti e gestire le segnalazioni</li>
+        </ul>
+
+        <h2>4. Visibilità dei dati</h2>
+        <ul>
+          <li>Nel catalogo pubblico è visibile solo il <strong>nome del venditore</strong> (senza cognome o classe)</li>
+          <li>L'email non è mai visibile pubblicamente</li>
+          <li>I dati completi vengono condivisi tra le due parti <strong>solo dopo la conferma di una prenotazione</strong>, limitatamente a quanto necessario per organizzare lo scambio</li>
+          <li>L'amministratore ha accesso a tutti i dati per finalità di moderazione</li>
+        </ul>
+
+        <h2>5. Base giuridica</h2>
+        <p>Il trattamento si basa sul consenso espresso dell'utente al momento della registrazione, nel rispetto dell'art. 6 lett. a) del Regolamento (UE) 2016/679 (GDPR).</p>
+
+        <h2>6. Conservazione dei dati</h2>
+        <ul>
+          <li>Gli annunci attivi sono conservati per la durata dell'anno scolastico in corso</li>
+          <li>Gli annunci completati o cancellati vengono eliminati entro 30 giorni</li>
+          <li>I dati di accesso vengono eliminati a fine anno scolastico</li>
+          <li>Puoi richiedere la cancellazione del tuo account in qualsiasi momento</li>
+        </ul>
+
+        <h2>7. Diritti dell'interessato</h2>
+        <p>Hai il diritto di:</p>
+        <ul>
+          <li>Accedere ai tuoi dati personali</li>
+          <li>Chiedere la rettifica di dati inesatti</li>
+          <li>Richiedere la cancellazione dell'account e di tutti i dati associati</li>
+        </ul>
+
+        <h2>8. Sicurezza dei dati</h2>
+        <p>I dati sono conservati su infrastrutture sicure. L'accesso è protetto da autenticazione. Non vengono ceduti a terzi per finalità commerciali.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROFILO ============ -->
+  <section class="view" id="view-profilo">
+    <div class="container" style="max-width:640px">
+      <div class="page-head"><div><span class="eyebrow">Account</span><h1 class="h-page" style="margin-top:.4rem">Il mio profilo.</h1></div></div>
+      <div id="profilo-guard"></div>
+      <div id="profilo-body" hidden>
+        <form class="card" id="profilo-form">
+          <div class="form-grid">
+            <div class="field"><label for="p-nome">Nome</label><input class="input" id="p-nome" type="text" /></div>
+            <div class="field"><label for="p-cognome">Cognome</label><input class="input" id="p-cognome" type="text" /></div>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label for="p-classe">Classe</label><input class="input" id="p-classe" type="text" placeholder="Es. 4B" /></div>
+            <div class="field"><label for="p-indirizzo">Indirizzo di studio</label><input class="input" id="p-indirizzo" type="text" placeholder="Es. Informatica" /></div>
+          </div>
+          <div class="field"><label>Email istituzionale</label><input class="input" id="p-email" type="text" disabled /></div>
+          <button type="submit" class="btn btn-primary">Salva profilo</button>
+        </form>
+        <div class="section-title">Prenotazioni recenti</div>
+        <div id="profilo-prenotazioni"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ADMIN ============ -->
+  <section class="view" id="view-admin">
+    <div class="container">
+      <div class="page-head"><div><span class="eyebrow" style="color:var(--viola)">Riservato al team</span><h1 class="h-page" style="margin-top:.4rem">Il banco di regia.</h1></div></div>
+      <div id="admin-guard"></div>
+      <div id="admin-body" hidden>
+        <div class="stat-cards" id="admin-stats"></div>
+        <div class="tabs" role="tablist">
+          <button class="tab" data-admin-tab="annunci" aria-selected="true">Annunci</button>
+          <button class="tab" data-admin-tab="classi">Classi e Libri</button>
+          <button class="tab" data-admin-tab="prenotazioni">Prenotazioni <span class="count" id="cnt-prenot">0</span></button>
+          <button class="tab" data-admin-tab="segnalazioni">Segnalazioni <span class="count" id="cnt-seg">0</span></button>
+          <button class="tab" data-admin-tab="utenti">Utenti</button>
+        </div>
+        <div id="admin-panel-body"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container school-credit">
+    <span><b>Mercatino dei Libri Usati</b> — Ideato e curato da Prof. Salvatore D'Agata con il supporto di tecnologie di IA.</span>
+    <span>ISIS D. Vinci · R. Carli · D. Sandrinelli</span>
+  </div>
+</footer>
+
+<!-- MODAL: LOGIN -->
+<div class="modal-backdrop" id="modal-login">
+  <div class="modal" style="width:min(420px,100%)">
+    <div class="modal-head">
+      <div><span class="eyebrow">Accesso</span><h3 class="h-card" style="margin-top:.3rem">Accedi con Google</h3></div>
+      <button class="modal-close" data-close="modal-login" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <p class="small muted" id="login-context">Accesso consentito solo con un account Google del dominio <b>@dcstrieste.it</b>. Al primo accesso il profilo viene creato automaticamente in Firestore.</p>
+      <button class="btn btn-google btn-block" id="google-login-btn" style="margin-top:.6rem">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.85A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.44.34-2.1V7.05H2.18A11 11 0 0 0 1 12c0 1.77.42 3.45 1.18 4.95z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.85C6.71 7.3 9.14 5.38 12 5.38z"/></svg>
+        Accedi con Google
+      </button>
+      <p class="field-hint" id="login-error" style="margin-top:1rem;color:var(--arancio-scuro);display:none"></p>
+      <p class="field-hint" style="margin-top:1rem">Chi accede con un'email fuori dal dominio della scuola viene disconnesso automaticamente, subito dopo il consenso Google.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ACCOUNT / LOGOUT -->
+<div class="modal-backdrop" id="modal-account">
+  <div class="modal" style="width:min(380px,100%)">
+    <div class="modal-head"><h3 class="h-card">Il tuo account</h3>
+      <button class="modal-close" data-close="modal-account" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="modal-account-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: REGOLAMENTO -->
+<div class="modal-backdrop" id="modal-regolamento">
+  <div class="modal">
+    <div class="modal-head info"><h3 class="h-card">Regolamento del mercatino</h3>
+      <button class="modal-close" data-close="modal-regolamento" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:.6rem;font-size:.9rem">
+        <li>Pubblica solo libri di testo effettivamente adottati e in tuo possesso.</li>
+        <li>Indica prezzo, condizione e disponibilità in modo veritiero.</li>
+        <li>La piattaforma non gestisce pagamenti: l'accordo economico avviene sempre direttamente tra le due parti.</li>
+        <li>Lo scambio avviene di persona, a scuola, nel luogo e nell'orario concordati.</li>
+        <li>La cancellazione di una prenotazione richiede un preavviso di almeno 24 ore.</li>
+        <li>Comportamenti scorretti possono essere segnalati al team tramite la sezione Assistenza.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETTAGLIO PRENOTA -->
+<div class="modal-backdrop" id="modal-prenota">
+  <div class="modal">
+    <div class="modal-head info"><div><span class="eyebrow" style="color:var(--ciano-scuro)">Prenotazione</span><h3 class="h-card" style="margin-top:.3rem">Scegli data e ora</h3></div>
+      <button class="modal-close" data-close="modal-prenota" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="modal-prenota-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: RICEVUTA -->
+<div class="modal-backdrop" id="modal-ricevuta">
+  <div class="modal">
+    <div class="modal-head viola"><h3 class="h-card">Ricevuta / modulo di vendita</h3>
+      <button class="modal-close" data-close="modal-ricevuta" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <pre id="ricevuta-text" style="white-space:pre-wrap;font-family:var(--sans);font-size:.85rem;background:var(--avorio);padding:1rem;border-radius:var(--r-s);border:1px solid var(--grigio-200)"></pre>
+      <button class="btn btn-primary btn-block" id="ricevuta-download" style="margin-top:1rem">Scarica ricevuta (PDF)</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ANNULLA (annuncio o prenotazione, con motivazione) -->
+<div class="modal-backdrop" id="modal-annulla">
+  <div class="modal" style="width:min(420px,100%)">
+    <div class="modal-head warn"><h3 class="h-card" id="modal-annulla-title">Annulla</h3>
+      <button class="modal-close" data-close="modal-annulla" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="modal-annulla-body"></div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* ============================================================
+   FIREBASE — inizializzazione con il progetto reale
+   ============================================================ */
+var firebaseConfig = {
+  apiKey: "AIzaSyCog_pF-N_St1T68S40FNkxwlto8RyN9T8",
+  authDomain: "dcstriestemercatino.firebaseapp.com",
+  databaseURL: "https://dcstriestemercatino-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "dcstriestemercatino",
+  storageBucket: "dcstriestemercatino.firebasestorage.app",
+  messagingSenderId: "390139151582",
+  appId: "1:390139151582:web:c1c5a268911a565d71ae4f"
+};
+firebase.initializeApp(firebaseConfig);
+var auth = firebase.auth();
+var db = firebase.firestore();
+var FieldValue = firebase.firestore.FieldValue;
+
+var DOMAIN = 'dcstrieste.it';
+var ADMIN_WHITELIST = ['dirigente@dcstrieste.it','admin@dcstrieste.it','salvatore.dagata@dcstrieste.it']; // deve combaciare con firestore.rules
+var googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({hd: DOMAIN, prompt: 'select_account'});
+
+var colClassi = db.collection('classisezioni');
+var colLibriTesto = db.collection('libritesto');
+var colLibri = db.collection('libri');
+var colPrenotazioni = db.collection('prenotazioni');
+var colSegnalazioni = db.collection('segnalazioni');
+var colUtenti = db.collection('utenti');
+
+var CATEGORIE_SEGNALAZIONE = ['Annunci','ISBN','Contenuti','Prenotazioni','Account','Problemi tecnici'];
+var STATO_LIBRO_LABEL = {disponibile:'Disponibile',prenotato:'Prenotato',venduto:'Venduto',disattivato:'Disattivato'};
+var STATO_PREN_LABEL = {prenotato:'In attesa di conferma',confermato:'Appuntamento confermato',completato:'Scambio completato',annullato:'Annullata'};
+var COND_CLASS={Ottima:'ot',Buona:'bu',Discreta:'di',Usurata:'di'};
+var PALETTE=['#FF9302','#009BE0','#6CBD01','#8E2595'];
+
+function timeSlots(){var out=[];for(var h=7;h<=17;h++){out.push(pad(h)+':00');if(h<17)out.push(pad(h)+':30');}return out;}
+function pad(n){return n<10?'0'+n:''+n;}
+var ORARI_GRIGLIA = timeSlots();
+
+/* ============================================================
+   STATO LOCALE (cache alimentate dai listener Firestore)
+   ============================================================ */
+var currentUser = null; // {uid,email,nome,cognome,classe,indirizzo,ruolo}
+var CLASSI = [];
+var LIBRITESTO = [];
+var LIBRI = [];
+var UTENTI_BY_UID = {};
+var PRENOTAZIONI = []; // tutte se admin, solo le proprie altrimenti
+var SEGNALAZIONI = []; // tutte se admin, solo le proprie altrimenti
+var pendingView = null;
+var boundUnsubs = []; // listener legati alla sessione, da staccare al logout
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+function $(s,c){return (c||document).querySelector(s);}
+function $$(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s));}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmtPrice(n){return '€ '+Number(n).toFixed(2).replace(/\.00$/,'').replace('.',',');}
+function fmtDate(d){try{return new Date(d+'T00:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'});}catch(e){return d;}}
+function fmtLuogo(obj){return esc(obj.sede)+' · '+esc(obj.luogo);}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+function initials(u){return ((u.nome||' ')[0]+(u.cognome||' ')[0]).toUpperCase();}
+function colorFor(id){var h=0;for(var i=0;i<id.length;i++)h=id.charCodeAt(i)+((h<<5)-h);return PALETTE[Math.abs(h)%PALETTE.length];}
+var MATERIA_COLORI = (function(){
+  var gruppi = [
+    ['#F99326', ['Italiano','Storia','Arte','IRC','Geografia','Geografia turistica']],
+    ['#76B800', ['Psicologia e Scienze Umane','Tecniche di comunicazione','Metodologie Operative']],
+    ['#0091CD', ['Matematica','Igiene e cultura medico-sanitaria','Scienze motorie e sportive','Scienze Integrate']],
+    ['#FF7F50', ['Lingua Inglese','Lingua tedesca','Lingua spagnola','Lingua francese']],
+    ['#0F52BA', ['Diritto e Economia','Economia aziendale','Diritto','Tecnica amministrativa e legislazione socio-sanitaria','Discipline turistico e aziendali','Diritto e legislazione turistica','Tecniche professionali dei servizi commerciali']],
+    ['#A12B93', ['Informatica e TIC']]
+  ];
+  var map={};
+  gruppi.forEach(function(g){g[1].forEach(function(m){map[m.trim().toLowerCase()]=g[0];});});
+  return map;
+})();
+function colorForMateria(materia){
+  var key=(materia||'').trim().toLowerCase();
+  return MATERIA_COLORI[key] || colorFor(materia||'x');
+}
+function libroTesto(id){return LIBRITESTO.filter(function(l){return l.id===id;})[0];}
+function libro(id){return LIBRI.filter(function(b){return b.id===id;})[0];}
+function prenotazioneDiLibro(bookId){var list=PRENOTAZIONI.filter(function(p){return p.libroId===bookId && p.stato!=='annullato';});return list[list.length-1];}
+function notificaNuovaPrenotazione(p){
+  var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
+  var titolo=lt?lt.titolo:'un tuo libro';
+  toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
+  setNotifDot('notif-dot-item');
+}
+function setNotifDot(id){var el=$('#'+id);if(el)el.hidden=false;updateNotifToggle();}
+function clearNotifDot(id){var el=$('#'+id);if(el)el.hidden=true;updateNotifToggle();}
+function updateNotifToggle(){
+  var toggle=$('#notif-dot-toggle');if(!toggle)return;
+  var item=$('#notif-dot-item'),acq=$('#notif-dot-acquirente');
+  var any=(item && !item.hidden) || (acq && !acq.hidden);
+  toggle.hidden=!any;
+}
+/* ============================================================
+   NOTIFICHE LIVE — popup toast per gli aggiornamenti in tempo reale
+   (nuovi annunci, prenotazioni, cambi di stato, segnalazioni...)
+   ============================================================ */
+function notificaLibroChange(ch){
+  if(ch.type!=='added')return;
+  var newData=ch.doc.data();
+  var lt=libroTesto(newData.libroTestoId);
+  var titolo=lt?lt.titolo:'un libro';
+  toast('📚 Nuovo libro in bacheca: «'+esc(titolo)+'».','success');
+}
+function notificaPrenotazioneChange(ch,opts){
+  opts=opts||{};
+  var p=Object.assign({id:ch.doc.id},ch.doc.data());
+  var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
+  var titolo=lt?lt.titolo:'un libro';
+  if(ch.type==='added'){
+    if(opts.notifyAdded)toast('📥 Nuova prenotazione: «'+esc(titolo)+'» da '+esc(utenteNomeByUid(p.acquirente))+'.','success');
+  }else if(ch.type==='removed'){
+    toast('🗑️ Prenotazione rimossa dallo storico: «'+esc(titolo)+'».','brand');
+    if(opts.dotId)setNotifDot(opts.dotId);
+  }else if(ch.type==='modified'){
+    var prev=opts.getPrev?opts.getPrev(p.id):null;
+    if(prev && prev.stato!==p.stato){
+      if(p.stato==='confermato')toast('✅ Appuntamento confermato per «'+esc(titolo)+'».','success');
+      else if(p.stato==='completato')toast('🤝 Scambio completato: «'+esc(titolo)+'».','success');
+      else if(p.stato==='annullato')toast('❌ Prenotazione annullata: «'+esc(titolo)+'».','warn');
+      if(opts.dotId)setNotifDot(opts.dotId);
+    }
+  }
+}
+function notificaSegnalazioneChange(ch,opts){
+  opts=opts||{};
+  var s=Object.assign({id:ch.doc.id},ch.doc.data());
+  if(ch.type==='added'){
+    if(opts.notifyAdded)toast('🆘 Nuova segnalazione ricevuta (categoria: '+esc(s.categoria)+').','warn');
+  }else if(ch.type==='modified'){
+    if(opts.notifyModified){
+      var prev=opts.getPrev?opts.getPrev(s.id):null;
+      if(prev && prev.stato!==s.stato)toast('ℹ️ Stato della tua segnalazione aggiornato: '+esc(s.stato)+'.','brand');
+    }
+  }
+}
+function pulisciNotificaPrenRicevute(){clearNotifDot('notif-dot-item');}
+function pulisciNotificaAcquirente(){clearNotifDot('notif-dot-acquirente');}
+function utenteNomeByUid(uid){var u=UTENTI_BY_UID[uid];return u?(u.nome+' '+u.cognome):'—';}
+function utenteNomeSoloByUid(uid){var u=UTENTI_BY_UID[uid];return u&&u.nome?u.nome:'—';}
+
+function toast(msg,type){
+  var stack=$('#toast-stack');var el=document.createElement('div');
+  el.className='toast'+(type?' '+type:'');el.textContent=msg;stack.appendChild(el);
+  setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove();},300);},3800);
+}
+function openModal(id){$('#'+id).classList.add('open');}
+function closeModal(id){$('#'+id).classList.remove('open');}
+$$('.modal-close,[data-close]').forEach(function(b){b.addEventListener('click',function(){closeModal(b.dataset.close);});});
+$$('.modal-backdrop').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
+
+/* ============================================================
+   AUTENTICAZIONE — Google Sign-In reale, dominio scuola, whitelist admin
+   ============================================================ */
+$('#google-login-btn').addEventListener('click',async function(){
+  $('#login-error').style.display='none';
+  try{
+    await auth.signInWithPopup(googleProvider);
+    // il resto succede in onAuthStateChanged
+  }catch(err){
+    if(err && (err.code==='auth/popup-closed-by-user' || err.code==='auth/cancelled-popup-request'))return;
+    var msg = err && err.code==='auth/popup-blocked'
+      ? 'Il browser ha bloccato il popup di accesso: consenti i popup per questo sito e riprova.'
+      : 'Accesso non riuscito ('+(err&&err.code?err.code:'errore')+').';
+    $('#login-error').textContent=msg;$('#login-error').style.display='block';
+  }
+});
+
+auth.onAuthStateChanged(function(user){
+  if(!user){
+    currentUser=null;detachSessionListeners();updateAuthUI();
+    if(document.readyState!=='loading')render();
+    return;
+  }
+  var email=(user.email||'').toLowerCase();
+  if(email.split('@')[1]!==DOMAIN){
+    toast('Dominio non autorizzato: puoi accedere solo con un\'email @'+DOMAIN+'. Disconnesso automaticamente.','warn');
+    auth.signOut();
+    return;
+  }
+  ensureProfile(user,email).then(function(){
+    closeModal('modal-login');
+    attachSessionListeners();
+    updateAuthUI();
+    toast('Accesso effettuato come '+currentUser.nome+' '+currentUser.cognome+'.','success');
+    if(pendingView){var v=pendingView;pendingView=null;showView(v);}else{render();}
+  }).catch(function(err){
+    toast('Errore nel caricamento del profilo: '+err.message,'warn');
+  });
+});
+
+function ensureProfile(user,email){
+  var ref=colUtenti.doc(user.uid);
+  var ruolo = ADMIN_WHITELIST.indexOf(email)!==-1 ? 'admin' : 'studente';
+  return ref.get().then(function(snap){
+    if(snap.exists){
+      var data=snap.data();
+      var patch={};
+      if(data.ruolo!==ruolo)patch.ruolo=ruolo; // il ruolo admin è ricalcolato ad ogni accesso dalla whitelist
+      var apply=Object.keys(patch).length ? ref.update(patch) : Promise.resolve();
+      return apply.then(function(){
+        currentUser=Object.assign({uid:user.uid},data,patch);
+      });
+    }else{
+      var parts=email.split('@')[0].split('.');
+      var profile={email:email,nome:cap(parts[0])||'Nuovo',cognome:cap(parts[1])||'Utente',classe:'',indirizzo:'',ruolo:ruolo};
+      return ref.set(profile).then(function(){currentUser=Object.assign({uid:user.uid},profile);});
+    }
+  });
+}
+
+function logout(){auth.signOut();closeModal('modal-account');showView('catalogo');}
+
+function updateAuthUI(){
+  var avatarBtn=$('#avatar-btn'),rolePill=$('#role-pill'),adminItem=$('#nav-admin-item');
+  if(currentUser){
+    avatarBtn.style.background=colorFor(currentUser.uid);
+    avatarBtn.textContent=initials(currentUser);
+    if(currentUser.ruolo==='admin'){rolePill.hidden=false;rolePill.textContent='Admin';}else{rolePill.hidden=true;}
+    adminItem.hidden = currentUser.ruolo!=='admin';
+  }else{
+    avatarBtn.style.background='var(--viola)';avatarBtn.textContent='?';
+    rolePill.hidden=true;adminItem.hidden=true;
+  }
+}
+$('#avatar-btn').addEventListener('click',function(){
+  if(!currentUser){openModal('modal-login');return;}
+  $('#modal-account-body').innerHTML=
+    '<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:1rem">'+
+    '<span class="account-avatar" style="width:44px;height:44px;font-size:.95rem;background:'+colorFor(currentUser.uid)+'">'+esc(initials(currentUser))+'</span>'+
+    '<div><strong>'+esc(currentUser.nome+' '+currentUser.cognome)+'</strong><br/><span class="small muted">'+esc(currentUser.email)+'</span></div></div>'+
+    (currentUser.ruolo==='admin'?'<p class="small" style="margin-bottom:1rem"><span class="role-pill">Admin</span> account in whitelist</p>':'')+
+    '<button class="btn btn-outline btn-block" data-view="profilo" data-close="modal-account" style="margin-bottom:.6rem">Modifica profilo</button>'+
+    '<button class="btn btn-outline btn-block" id="logout-btn">Esci</button>';
+  $('#modal-account [data-view]').addEventListener('click',function(){closeModal('modal-account');showView('profilo');});
+  $('#logout-btn').addEventListener('click',logout);
+  openModal('modal-account');
+});
+
+function requireAuth(viewId, roleNeeded){
+  var guardEl=document.getElementById(viewId+'-guard');
+  if(!guardEl)return true;
+  if(!currentUser){
+    guardEl.hidden=false;
+    guardEl.innerHTML=
+      '<div class="card guard-card">'+
+      '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>'+
+      '<p style="font-size:.9rem;color:var(--ink-soft);margin-bottom:1.1rem">Questa sezione richiede l\'accesso con un account Google della scuola.</p>'+
+      '<button class="btn btn-primary" id="guard-login-btn">Accedi con Google</button></div>';
+    $('#guard-login-btn').addEventListener('click',function(){pendingView=viewId;openModal('modal-login');});
+    return false;
+  }
+  if(roleNeeded && currentUser.ruolo!==roleNeeded){
+    guardEl.hidden=false;
+    guardEl.innerHTML='<div class="card guard-card"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg><p style="font-size:.9rem;color:var(--ink-soft)">Accesso riservato al team (whitelist admin). Il tuo account non ha i permessi necessari.</p></div>';
+    return false;
+  }
+  guardEl.hidden=true;
+  return true;
+}
+
+/* ============================================================
+   LISTENER FIRESTORE
+   — classisezioni/libritesto: pubblici, sempre attivi
+   — libri/utenti: leggibili da chiunque sia autenticato con dominio scuola
+   — prenotazioni/segnalazioni: l'admin vede tutto, gli altri solo le proprie
+   ============================================================ */
+colClassi.onSnapshot(function(snap){
+  CLASSI=snap.docs.map(function(d){return d.id;}).sort();
+  refreshClassiSelects();
+  if(activeViewName()==='admin')renderAdminPanel();
+},function(err){console.error('classisezioni',err);});
+
+colLibriTesto.onSnapshot(function(snap){
+  LIBRITESTO=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+  refreshMaterieSelect();
+  if(!currentUser)return;
+  var v=activeViewName();
+  if(v==='vendi'){refreshLibroSelect();} // aggiorna la select in live senza svuotare il form già compilato
+  else renderView(v);
+},function(err){console.error('libritesto',err);});
+
+function attachSessionListeners(){
+  detachSessionListeners();
+  var libriInitialLoaded=false;
+  boundUnsubs.push(colLibri.onSnapshot(function(snap){
+    if(libriInitialLoaded){
+      snap.docChanges().forEach(function(ch){notificaLibroChange(ch);});
+    }
+    LIBRI=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    libriInitialLoaded=true;
+    rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','admin','profilo']);
+  },function(err){console.error('libri',err);}));
+
+  boundUnsubs.push(colUtenti.onSnapshot(function(snap){
+    UTENTI_BY_UID={};
+    snap.docs.forEach(function(d){UTENTI_BY_UID[d.id]=Object.assign({uid:d.id},d.data());});
+    rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','admin']);
+  },function(err){console.error('utenti',err);}));
+
+  if(currentUser.ruolo==='admin'){
+    var prenAdminInitialLoaded=false;
+    boundUnsubs.push(colPrenotazioni.onSnapshot(function(snap){
+      var prevById={};PRENOTAZIONI.forEach(function(p){prevById[p.id]=p;});
+      if(prenAdminInitialLoaded){
+        snap.docChanges().forEach(function(ch){
+          notificaPrenotazioneChange(ch,{notifyAdded:true,getPrev:function(id){return prevById[id];}});
+        });
+      }
+      PRENOTAZIONI=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+      prenAdminInitialLoaded=true;
+      rerenderIfActive(['miei-annunci','prenotazioni','pren-ricevute','profilo','admin']);
+    },function(err){console.error('prenotazioni(admin)',err);}));
+    var segAdminInitialLoaded=false;
+    boundUnsubs.push(colSegnalazioni.onSnapshot(function(snap){
+      if(segAdminInitialLoaded){
+        snap.docChanges().forEach(function(ch){notificaSegnalazioneChange(ch,{notifyAdded:true});});
+      }
+      SEGNALAZIONI=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+      segAdminInitialLoaded=true;
+      rerenderIfActive(['assistenza','admin']);
+    },function(err){console.error('segnalazioni(admin)',err);}));
+  }else{
+    var cacheAcq={},cacheVen={},acqInitialLoaded=false,venInitialLoaded=false;
+    function mergePren(){
+      var merged={};Object.assign(merged,cacheAcq,cacheVen);
+      PRENOTAZIONI=Object.values(merged);
+      rerenderIfActive(['miei-annunci','prenotazioni','pren-ricevute','profilo']);
+    }
+    boundUnsubs.push(colPrenotazioni.where('acquirente','==',currentUser.uid).onSnapshot(function(snap){
+      if(acqInitialLoaded){
+        snap.docChanges().forEach(function(ch){
+          notificaPrenotazioneChange(ch,{notifyAdded:false,dotId:'notif-dot-acquirente',getPrev:function(id){return cacheAcq[id];}});
+        });
+      }
+      cacheAcq={};snap.docs.forEach(function(d){cacheAcq[d.id]=Object.assign({id:d.id},d.data());});
+      acqInitialLoaded=true;mergePren();
+    },function(err){console.error('prenotazioni(acquirente)',err);}));
+    boundUnsubs.push(colPrenotazioni.where('venditore','==',currentUser.uid).onSnapshot(function(snap){
+      if(venInitialLoaded){
+        snap.docChanges().forEach(function(ch){
+          if(ch.type==='added')notificaNuovaPrenotazione(Object.assign({id:ch.doc.id},ch.doc.data()));
+          else notificaPrenotazioneChange(ch,{notifyAdded:false,dotId:'notif-dot-item',getPrev:function(id){return cacheVen[id];}});
+        });
+      }
+      cacheVen={};snap.docs.forEach(function(d){cacheVen[d.id]=Object.assign({id:d.id},d.data());});
+      venInitialLoaded=true;mergePren();
+    },function(err){console.error('prenotazioni(venditore)',err);}));
+    var segMieInitialLoaded=false,cacheSegMie={};
+    boundUnsubs.push(colSegnalazioni.where('utente','==',currentUser.uid).onSnapshot(function(snap){
+      if(segMieInitialLoaded){
+        snap.docChanges().forEach(function(ch){
+          notificaSegnalazioneChange(ch,{notifyAdded:false,notifyModified:true,getPrev:function(id){return cacheSegMie[id];}});
+        });
+      }
+      cacheSegMie={};snap.docs.forEach(function(d){cacheSegMie[d.id]=Object.assign({id:d.id},d.data());});
+      SEGNALAZIONI=Object.values(cacheSegMie);
+      segMieInitialLoaded=true;
+      rerenderIfActive(['assistenza']);
+    },function(err){console.error('segnalazioni(mie)',err);}));
+  }
+}
+function detachSessionListeners(){
+  boundUnsubs.forEach(function(u){try{u();}catch(e){}});
+  boundUnsubs=[];LIBRI=[];UTENTI_BY_UID={};PRENOTAZIONI=[];SEGNALAZIONI=[];
+}
+function rerenderIfActive(viewNames){
+  var v=activeViewName();
+  if(viewNames.indexOf(v)!==-1)renderView(v);
+}
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+var VIEWS=['catalogo','dettaglio','vendi','miei-annunci','prenotazioni','pren-ricevute','assistenza','regolamento','profilo','admin'];
+var routeState={};
+function activeViewName(){return VIEWS.filter(function(v){return $('#view-'+v).classList.contains('active');})[0]||'catalogo';}
+function showView(name,state){
+  routeState=state||{};
+  VIEWS.forEach(function(v){$('#view-'+v).classList.toggle('active',v===name);});
+  $$('#nav-links [data-view]').forEach(function(b){b.setAttribute('aria-current',b.dataset.view===name?'true':'false');});
+  $$('.nav-dropdown').forEach(function(dd){
+    var haveActive=!!dd.querySelector('[data-view="'+name+'"]');
+    dd.classList.remove('open');
+    var toggle=dd.querySelector('.nav-dropdown-toggle');
+    if(toggle){toggle.setAttribute('aria-current',haveActive?'true':'false');toggle.setAttribute('aria-expanded','false');}
+  });
+  $('#nav-links').classList.remove('open');
+  window.scrollTo(0,0);
+  renderView(name);
+}
+$$('[data-view]').forEach(function(el){el.addEventListener('click',function(){showView(el.dataset.view);});});
+$$('.nav-dropdown-toggle').forEach(function(t){
+  t.addEventListener('click',function(e){
+    e.stopPropagation();
+    var dd=t.closest('.nav-dropdown');
+    var willOpen=!dd.classList.contains('open');
+    $$('.nav-dropdown').forEach(function(o){o.classList.remove('open');o.querySelector('.nav-dropdown-toggle').setAttribute('aria-expanded','false');});
+    if(willOpen){dd.classList.add('open');t.setAttribute('aria-expanded','true');}
+  });
+});
+document.addEventListener('click',function(){$$('.nav-dropdown').forEach(function(o){o.classList.remove('open');o.querySelector('.nav-dropdown-toggle').setAttribute('aria-expanded','false');});});
+$('#hamburger').addEventListener('click',function(){
+  var open=$('#nav-links').classList.toggle('open');
+  $('#hamburger').setAttribute('aria-expanded',String(open));
+});
+
+function renderView(name){
+  if(name==='catalogo')renderCatalogo();
+  else if(name==='dettaglio')renderDettaglio(routeState.id);
+  else if(name==='vendi')renderVendi();
+  else if(name==='miei-annunci')renderMieiAnnunci();
+  else if(name==='prenotazioni')renderPrenotazioni();
+  else if(name==='pren-ricevute')renderPrenotazioniRicevute();
+  else if(name==='assistenza')renderAssistenza();
+  else if(name==='profilo')renderProfilo();
+  else if(name==='admin')renderAdmin();
+}
+function render(){renderView(activeViewName());}
+
+/* ============================================================
+   CATALOGO (richiede login, come nel sito reale)
+   ============================================================ */
+function refreshClassiSelects(){
+  [$('#f-classe'),$('#s-classe')].forEach(function(sel){
+    if(!sel)return;
+    var withAll=sel.id==='f-classe';
+    var html = withAll?'<option value="">Tutte le classi</option>':'<option value="">Scegli la tua classe…</option>';
+    html += CLASSI.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('');
+    var cur=sel.value;sel.innerHTML=html;if(CLASSI.indexOf(cur)!==-1)sel.value=cur;
+  });
+}
+function refreshMaterieSelect(){
+  var sel=$('#f-materia');if(!sel)return;
+  var materie=Array.from(new Set(LIBRITESTO.map(function(l){return l.materia;}))).sort();
+  var cur=sel.value;
+  sel.innerHTML='<option value="">Tutte le materie</option>'+materie.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join('');
+  if(materie.indexOf(cur)!==-1)sel.value=cur;
+}
+['#f-search','#f-classe','#f-materia','#f-stato','#f-prezzo'].forEach(function(s){
+  $(s).addEventListener('input',renderCatalogo);$(s).addEventListener('change',renderCatalogo);
+});
+
+function bookCardHTML(b){
+  var lt=libroTesto(b.libroTestoId);if(!lt)return '';
+  var color=colorForMateria(lt.materia);
+  var venditoreNome=utenteNomeSoloByUid(b.venditore);
+  return '<article class="book-card" data-id="'+b.id+'">'+
+    '<div class="cover" style="background:linear-gradient(160deg,'+color+',rgba(0,0,0,.25))">'+
+    '<span class="badge-cond '+(COND_CLASS[b.condizione]||'bu')+'">'+esc(b.condizione)+'</span>'+
+    '<span class="cover-initial">'+esc(lt.titolo[0])+'</span>'+
+    '<div><div class="cover-title">'+esc(lt.titolo)+'</div><div class="cover-materia">'+esc(lt.materia)+'</div></div>'+
+    '<span class="price-tag price">'+fmtPrice(b.prezzo)+'</span></div>'+
+    '<div class="book-info"><h3 class="h-card">'+esc(lt.titolo)+'</h3><p class="book-author">'+esc(lt.autori)+'</p>'+
+    '<div class="book-foot"><span class="badge '+b.stato+'">'+esc(STATO_LIBRO_LABEL[b.stato])+'</span><span class="small muted">'+esc(lt.classe)+'</span></div>'+
+    '<p class="small muted" style="margin-top:.3rem">Venduto da <strong>'+esc(venditoreNome)+'</strong></p></div></article>';
+}
+function renderCatalogo(){
+  if(!requireAuth('catalogo')){$('#catalogo-body').hidden=true;return;}
+  $('#catalogo-body').hidden=false;
+  var q=$('#f-search').value.trim().toLowerCase();
+  var classe=$('#f-classe').value, materia=$('#f-materia').value, stato=$('#f-stato').value;
+  var prezzoMax=parseFloat($('#f-prezzo').value);
+  var list=LIBRI.filter(function(b){
+    if(b.stato==='disattivato' || b.stato==='venduto')return false;
+    var lt=libroTesto(b.libroTestoId);if(!lt)return false;
+    if(stato && b.stato!==stato)return false;
+    if(classe && lt.classe!==classe)return false;
+    if(materia && lt.materia!==materia)return false;
+    if(!isNaN(prezzoMax) && b.prezzo>prezzoMax)return false;
+    if(q && (lt.titolo+' '+lt.autori).toLowerCase().indexOf(q)===-1)return false;
+    return true;
+  }).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);});
+  var grid=$('#catalog-grid');
+  grid.innerHTML = list.length? list.map(bookCardHTML).join('') :
+    '<div class="empty" style="grid-column:1/-1"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><h3>Nessun libro trovato</h3><p class="small">Prova a modificare i filtri di ricerca.</p></div>';
+  $$('.book-card',grid).forEach(function(c){c.addEventListener('click',function(){showView('dettaglio',{id:c.dataset.id});});});
+}
+function tsMillis(t){if(!t)return 0;if(typeof t.toMillis==='function')return t.toMillis();return 0;}
+
+/* ============================================================
+   DETTAGLIO LIBRO + PRENOTAZIONE
+   ============================================================ */
+function renderDettaglio(id){
+  if(!requireAuth('catalogo'))return; // stessa regola di accesso del catalogo
+  var b=libro(id);var body=$('#dettaglio-body');
+  if(!b){body.innerHTML='<div class="empty"><h3>Annuncio non trovato</h3></div>';return;}
+  var lt=libroTesto(b.libroTestoId)||{titolo:'(libro di testo non più disponibile nel catalogo)',materia:'',classe:'',autori:'',volume:'',editore:'',isbn:''};
+  var color=colorForMateria(lt.materia);
+  var isOwner = currentUser && currentUser.uid===b.venditore;
+  var actionHTML='';
+  if(isOwner){
+    actionHTML='<p class="small muted">Questo è un tuo annuncio — gestiscilo dalla sezione «I miei annunci».</p>';
+  }else if(b.stato!=='disponibile'){
+    actionHTML='<p class="small muted">Questo libro non è più prenotabile (stato: '+esc(STATO_LIBRO_LABEL[b.stato])+').</p>';
+  }else{
+    actionHTML='<button class="btn btn-primary" id="btn-prenota">Prenota</button>';
+  }
+  body.innerHTML=
+    '<div style="display:grid;grid-template-columns:150px 1fr;gap:1.4rem;align-items:start">'+
+    '<div class="cover" style="border-radius:var(--r-s);background:linear-gradient(160deg,'+color+',rgba(0,0,0,.25))"><span class="badge-cond '+(COND_CLASS[b.condizione]||'bu')+'">'+esc(b.condizione)+'</span><span class="cover-initial">'+esc(lt.titolo[0])+'</span><div class="cover-title">'+esc(lt.titolo)+'</div></div>'+
+    '<div><span class="badge '+b.stato+'">'+esc(STATO_LIBRO_LABEL[b.stato])+'</span>'+
+    '<h2 class="h-card" style="font-size:1.4rem;margin-top:.5rem">'+esc(lt.titolo)+'</h2>'+
+    '<p class="price" style="font-size:1.3rem;color:var(--arancio-scuro);margin-top:.3rem">'+fmtPrice(b.prezzo)+'</p>'+
+    '<dl class="dl">'+
+    '<dt>Autori</dt><dd>'+esc(lt.autori)+'</dd>'+
+    '<dt>Volume</dt><dd>'+esc(lt.volume)+'</dd>'+
+    '<dt>Editore</dt><dd>'+esc(lt.editore)+'</dd>'+
+    '<dt>ISBN</dt><dd>'+esc(lt.isbn)+'</dd>'+
+    '<dt>Materia</dt><dd>'+esc(lt.materia)+'</dd>'+
+    '<dt>Classe</dt><dd>'+esc(lt.classe)+'</dd>'+
+    '<dt>Venditore</dt><dd>'+esc(utenteNomeSoloByUid(b.venditore))+'</dd>'+
+    '<dt>Sede</dt><dd>'+esc(b.sede)+'</dd>'+
+    '<dt>Luogo di scambio</dt><dd>'+esc(b.luogo)+'</dd>'+
+    '<dt>Date proposte</dt><dd>'+b.date.map(fmtDate).join(', ')+'</dd>'+
+    '<dt>Orari proposti</dt><dd>'+b.orari.join(', ')+'</dd>'+
+    '<dt>Pagamento</dt><dd>'+b.pagamenti.join(', ')+' — sempre di persona, mai gestito dalla piattaforma</dd>'+
+    '</dl><div style="margin-top:1.2rem">'+actionHTML+'</div></div></div>';
+  var pb=$('#btn-prenota');if(pb)pb.addEventListener('click',function(){openPrenotaModal(b);});
+}
+function openPrenotaModal(b){
+  var lt=libroTesto(b.libroTestoId)||{titolo:'(libro di testo non più disponibile nel catalogo)'};
+  var html='<p class="small muted" style="margin-bottom:1rem">'+esc(lt.titolo)+' — '+fmtPrice(b.prezzo)+' · '+fmtLuogo(b)+'</p>'+
+    '<form id="prenota-form"><div class="field"><label>Data <span class="req">*</span></label><div class="tag-list" style="gap:.5rem">'+
+    b.date.map(function(d){return '<label class="pay-opt" style="display:inline-flex"><input type="radio" name="pn-data" value="'+esc(d)+'"> '+fmtDate(d)+'</label>';}).join('')+
+    '</div></div><div class="field"><label>Ora <span class="req">*</span></label><div class="tag-list" style="gap:.5rem">'+
+    b.orari.map(function(o){return '<label class="pay-opt" style="display:inline-flex"><input type="radio" name="pn-ora" value="'+esc(o)+'"> '+o+'</label>';}).join('')+
+    '</div></div><p class="field-hint">Il luogo dell\'incontro è quello proposto dal venditore. Il pagamento avviene sempre di persona.</p>'+
+    '<button type="submit" class="btn btn-primary btn-block" style="margin-top:.6rem">Conferma prenotazione</button></form>';
+  $('#modal-prenota-body').innerHTML=html;
+  $('#prenota-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var data=(document.querySelector('input[name="pn-data"]:checked')||{}).value;
+    var ora=(document.querySelector('input[name="pn-ora"]:checked')||{}).value;
+    if(!data||!ora){toast('Scegli data e ora tra quelle proposte.','warn');return;}
+    var submitBtn=$('#prenota-form button[type=submit]');submitBtn.disabled=true;
+    var libroRef=colLibri.doc(b.id);
+    var prenRef=colPrenotazioni.doc();
+    db.runTransaction(function(tx){
+      return tx.get(libroRef).then(function(snap){
+        if(!snap.exists || snap.data().stato!=='disponibile'){
+          throw new Error('Questo libro non è più disponibile: qualcun altro potrebbe averlo appena prenotato.');
+        }
+        tx.set(prenRef,{
+          libroId:b.id,acquirente:currentUser.uid,venditore:b.venditore,sede:b.sede,luogo:b.luogo,data:data,ora:ora,
+          stato:'prenotato',appuntamentoConfermato:false,confermaVenditore:false,
+          createdAt:FieldValue.serverTimestamp()
+        });
+        tx.update(libroRef,{stato:'prenotato',prenotatoDa:currentUser.uid});
+      });
+    }).then(function(){
+      closeModal('modal-prenota');
+      toast('Prenotazione confermata! Il venditore dovrà confermare l\'appuntamento.','success');
+      showView('prenotazioni');
+    }).catch(function(err){submitBtn.disabled=false;toast('Errore: '+err.message,'warn');});
+  });
+  openModal('modal-prenota');
+}
+
+/* ============================================================
+   VENDI
+   ============================================================ */
+var sellDates=[];
+function renderVendi(){
+  if(!requireAuth('vendi')){$('#sell-form').hidden=true;return;}
+  $('#sell-form').hidden=false;$('#sell-ok').classList.remove('show');
+  $('#s-data-input').min=oggiISO();
+  sellDates=[];renderSellDates();
+  refreshClassiSelects();
+  $('#s-libro').innerHTML='<option value="">Scegli prima la classe…</option>';
+  $('#s-libro-hint').textContent='';
+  $('#s-orari-grid').innerHTML=ORARI_GRIGLIA.map(function(t){return '<button type="button" class="slot-chip" data-t="'+t+'" aria-pressed="false">'+t+'</button>';}).join('');
+  $$('.slot-chip',$('#s-orari-grid')).forEach(function(c){c.addEventListener('click',function(){c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')!=='true');});});
+  $('#s-classe').value='';$('#s-condizione').value='';$('#s-prezzo').value='';$('#s-sede').value='';$('#s-luogo').value='';$('#s-data-input').value='';
+  $$('#s-pagamenti input').forEach(function(i){i.checked=false;});
+  $('#s-regolamento').checked=false;
+}
+function refreshLibroSelect(){
+  var sel=$('#s-libro');if(!sel)return;
+  var classe=$('#s-classe').value;
+  if(!classe){sel.innerHTML='<option value="">Scegli prima la classe…</option>';return;}
+  var cur=sel.value;
+  var libri=LIBRITESTO.filter(function(l){return l.classe===classe;});
+  sel.innerHTML = libri.length ?
+    '<option value="">Scegli il libro…</option>'+libri.map(function(l){return '<option value="'+l.id+'">'+esc((l.isbn?'ISBN '+l.isbn+' — ':'')+l.titolo+' ('+l.materia+')')+'</option>';}).join('')
+    : '<option value="">Nessun libro adottato caricato per questa classe</option>';
+  $('#s-libro-hint').textContent='Elenco caricato dall\'amministrazione: puoi mettere in vendita solo libri effettivamente adottati.';
+  if(libri.some(function(l){return l.id===cur;}))sel.value=cur;
+}
+$('#s-classe').addEventListener('change',refreshLibroSelect);
+$('#s-libro').addEventListener('change',function(){
+  var lt=libroTesto($('#s-libro').value);
+  $('#s-libro-hint').textContent = lt
+    ? (lt.prezzo!=null ? 'Prezzo di copertina indicativo: '+fmtPrice(lt.prezzo)+' — puoi comunque indicare il prezzo che preferisci qui sotto.' : 'Elenco caricato dall\'amministrazione: puoi mettere in vendita solo libri effettivamente adottati.')
+    : '';
+});
+function renderSellDates(){
+  $('#s-date-list').innerHTML = sellDates.map(function(d,i){return '<span class="tag">'+fmtDate(d)+'<button type="button" data-i="'+i+'">×</button></span>';}).join('');
+  $$('#s-date-list button').forEach(function(b){b.addEventListener('click',function(){sellDates.splice(+b.dataset.i,1);renderSellDates();});});
+}
+function oggiISO(){var t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');}
+$('#s-data-input').min=oggiISO();
+$('#s-data-input').addEventListener('change',function(){
+  var v=this.value;
+  if(v){
+    if(v<oggiISO()){toast('Non puoi proporre una data di scambio antecedente a oggi.','warn');this.value='';return;}
+    if(sellDates.indexOf(v)===-1)sellDates.push(v);
+    sellDates.sort();renderSellDates();
+  }
+  this.value='';
+});
+$('#open-regolamento').addEventListener('click',function(){openModal('modal-regolamento');});
+function setRegTab(v){
+  $('#reg-content-regolamento').hidden = v!=='regolamento';
+  $('#reg-content-privacy').hidden = v!=='privacy';
+  $('#reg-titolo').textContent = v==='privacy'?'Informativa sulla privacy.':'Regolamento del mercatino.';
+}
+$$('#nav-dd-informazioni [data-reg-tab]').forEach(function(b){
+  b.addEventListener('click',function(){setRegTab(b.dataset.regTab);});
+});
+$('#sell-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var classe=$('#s-classe').value, libroTestoId=$('#s-libro').value, condizione=$('#s-condizione').value;
+  var prezzo=parseFloat($('#s-prezzo').value), sede=$('#s-sede').value, luogo=$('#s-luogo').value;
+  var orari=$$('.slot-chip[aria-pressed="true"]',$('#s-orari-grid')).map(function(c){return c.dataset.t;});
+  var pagamenti=$$('#s-pagamenti input:checked').map(function(i){return i.value;});
+  var okReg=$('#s-regolamento').checked;
+  if(!classe||!libroTestoId){toast('Scegli classe e libro adottato.','warn');return;}
+  if(!condizione||!prezzo||prezzo<=0){toast('Indica condizione e un prezzo valido.','warn');return;}
+  if(!sede||!luogo){toast('Scegli sede e luogo di scambio.','warn');return;}
+  if(!sellDates.length){toast('Scegli almeno una data disponibile.','warn');return;}
+  if(sellDates.some(function(d){return d<oggiISO();})){toast('Una delle date scelte è nel passato: rimuovila e scegline una da oggi in poi.','warn');return;}
+  if(!orari.length){toast('Scegli almeno un orario disponibile.','warn');return;}
+  if(!pagamenti.length){toast('Scegli almeno un metodo di pagamento accettato.','warn');return;}
+  if(!okReg){toast('Devi accettare il regolamento per pubblicare.','warn');return;}
+  var submitBtn=$('#sell-form button[type=submit]');submitBtn.disabled=true;
+  colLibri.add({
+    libroTestoId:libroTestoId,venditore:currentUser.uid,condizione:condizione,prezzo:prezzo,sede:sede,luogo:luogo,
+    date:sellDates.slice(),orari:orari,pagamenti:pagamenti,stato:'disponibile',createdAt:FieldValue.serverTimestamp()
+  }).then(function(){
+    $('#sell-ok').classList.add('show');
+    toast('Annuncio pubblicato.','success');
+    renderVendi();
+  }).catch(function(err){toast('Errore: '+err.message,'warn');}).finally(function(){submitBtn.disabled=false;});
+});
+
+/* ============================================================
+   I MIEI ANNUNCI
+   ============================================================ */
+function renderMieiAnnunci(){
+  if(!requireAuth('miei-annunci')){$('#miei-annunci-body').innerHTML='';return;}
+  var mine=LIBRI.filter(function(b){return b.venditore===currentUser.uid;}).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);});
+  var body=$('#miei-annunci-body');
+  if(!mine.length){body.innerHTML='<div class="empty"><h3>Non hai ancora pubblicato annunci</h3><p class="small">Vai alla sezione «Vendi» per mettere in vendita un libro adottato.</p></div>';return;}
+  body.innerHTML=mine.map(function(b){
+    var lt=libroTesto(b.libroTestoId)||{titolo:'(libro di testo non più disponibile nel catalogo)',materia:'',classe:''};var pren=prenotazioneDiLibro(b.id);
+    var actions='';
+    if(b.stato==='disponibile'){
+      actions='<button class="icon-btn ok" data-act="venduto" data-id="'+b.id+'">Segna come venduto</button><button class="icon-btn danger" data-act="annulla" data-id="'+b.id+'">Annulla annuncio</button>';
+    }else if(b.stato==='prenotato' && pren){
+      if(!pren.appuntamentoConfermato){actions='<button class="icon-btn ok" data-act="conferma-appuntamento" data-id="'+pren.id+'">Conferma appuntamento</button>';}
+      else{actions='<button class="icon-btn ok" data-act="completa-venditore" data-id="'+pren.id+'">Segnala scambio avvenuto</button>';}
+      actions+=' <button class="icon-btn danger" data-act="annulla" data-id="'+b.id+'">Annulla annuncio</button>';
+    }else if(b.stato==='venduto'){
+      actions='<button class="icon-btn danger" data-act="annulla-vendita" data-id="'+b.id+'">Annulla vendita</button> <button class="icon-btn" data-act="elimina-libro" data-id="'+b.id+'">Elimina</button>';
+    }
+    return '<div class="res-card"><div class="res-head"><div><strong>'+esc(lt.titolo)+'</strong><div class="small muted">'+esc(lt.materia)+' · '+esc(lt.classe)+'</div></div><span class="badge '+b.stato+'">'+esc(STATO_LIBRO_LABEL[b.stato])+'</span></div>'+
+      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(b)+'</span></div>'+
+      (pren?'<div class="res-meta"><span>Prenotato da '+esc(utenteNomeByUid(pren.acquirente))+'</span><span>'+fmtDate(pren.data)+' · '+pren.ora+'</span></div>'+confirmTrackHTML(pren):'')+
+      (b.stato==='disattivato' && b.motivoAnnullamento?'<p class="small muted" style="margin-top:.4rem">Motivo annullamento: '+esc(b.motivoAnnullamento)+(b.motivoAnnullamentoDettaglio?' — '+esc(b.motivoAnnullamentoDettaglio):'')+'</p>':'')+
+      '<div class="row-actions" style="margin-top:.6rem">'+actions+' <button class="icon-btn" data-act="ricevuta" data-id="'+b.id+'">Ricevuta</button></div></div>';
+  }).join('');
+  body.onclick=mieiAnnunciClick;
+}
+function confirmTrackHTML(pren){
+  return '<div class="confirm-track"><span><i class="dot '+(pren.appuntamentoConfermato?'on':'')+'"></i>Appuntamento confermato</span><span><i class="dot '+(pren.stato==='completato'?'on':'')+'"></i>Scambio completato</span></div>';
+}
+/* ============================================================
+   ANNULLAMENTO CON MOTIVAZIONE (annuncio o prenotazione)
+   ============================================================ */
+var MOTIVI_ANNULLA_ANNUNCIO=['Ho cambiato idea, non vendo più','Il libro non è più disponibile','Ho sbagliato a inserire l\'annuncio','Venduto fuori dalla piattaforma','Altro'];
+var MOTIVI_ANNULLA_PRENOTAZIONE=['Non mi serve più il libro','Ho trovato un\'altra copia','Non riesco più a rispettare l\'appuntamento','Il venditore non risponde','Altro'];
+var MOTIVI_ANNULLA_VENDITA=['Ho segnato "venduto" per errore','L\'acquirente non si è presentato','Il pagamento non è andato a buon fine','Ci siamo accordati per annullare lo scambio','Il libro non era più nelle condizioni indicate','Altro'];
+function openAnnullaModal(tipo,id){
+  var motivi=tipo==='annuncio'?MOTIVI_ANNULLA_ANNUNCIO:tipo==='vendita'?MOTIVI_ANNULLA_VENDITA:MOTIVI_ANNULLA_PRENOTAZIONE;
+  $('#modal-annulla-title').textContent=tipo==='annuncio'?'Annulla annuncio':tipo==='vendita'?'Annulla vendita':'Annulla prenotazione';
+  var options=motivi.map(function(m){return '<option value="'+esc(m)+'">'+esc(m)+'</option>';}).join('');
+  var hint=tipo==='prenotazione'
+    ?'<p class="field-hint">Puoi annullare in qualsiasi momento. Con meno di 24 ore dall\'appuntamento l\'annullamento resta comunque possibile, ma viene segnalato come da regolamento.</p>'
+    :tipo==='vendita'
+    ?'<p class="field-hint">Il libro tornerà visibile come «Disponibile» nel catalogo e potrà essere prenotato da qualcun altro. La prenotazione collegata verrà segnata come annullata.</p>'
+    :'<p class="field-hint">Se sul libro c\'è una prenotazione attiva, verrà annullata automaticamente e l\'acquirente vedrà il motivo.</p>';
+  $('#modal-annulla-body').innerHTML=
+    '<form id="annulla-form">'+
+    '<div class="field"><label for="annulla-motivo">Motivo dell\'annullamento <span class="req">*</span></label>'+
+    '<select class="select" id="annulla-motivo"><option value="">Scegli un motivo…</option>'+options+'</select></div>'+
+    '<div class="field" id="annulla-altro-wrap" hidden><label for="annulla-altro">Specifica</label><textarea class="textarea" id="annulla-altro" rows="2" placeholder="Descrivi brevemente il motivo…"></textarea></div>'+
+    hint+
+    '<button type="submit" class="btn btn-primary btn-block" style="margin-top:.6rem">Conferma annullamento</button>'+
+    '</form>';
+  openModal('modal-annulla');
+  var motivoSel=$('#annulla-motivo'),altroWrap=$('#annulla-altro-wrap');
+  motivoSel.addEventListener('change',function(){altroWrap.hidden=motivoSel.value!=='Altro';});
+  $('#annulla-form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var motivo=motivoSel.value;
+    if(!motivo){toast('Scegli un motivo dal menu.','warn');return;}
+    var dettaglio=motivo==='Altro'?$('#annulla-altro').value.trim():'';
+    if(motivo==='Altro' && !dettaglio){toast('Specifica il motivo nel campo di testo.','warn');return;}
+    var submitBtn=e.target.querySelector('button[type=submit]');submitBtn.disabled=true;
+    var task=tipo==='annuncio'?eseguiAnnullaAnnuncio(id,motivo,dettaglio):tipo==='vendita'?eseguiAnnullaVendita(id,motivo,dettaglio):eseguiAnnullaPrenotazione(id,motivo,dettaglio);
+    task.then(function(){closeModal('modal-annulla');}).catch(function(err){toast('Errore: '+err.message,'warn');submitBtn.disabled=false;});
+  });
+}
+function eseguiAnnullaAnnuncio(id,motivo,dettaglio){
+  var pren=prenotazioneDiLibro(id);
+  var task=colLibri.doc(id).update({stato:'disattivato',motivoAnnullamento:motivo,motivoAnnullamentoDettaglio:dettaglio||null,annullatoIl:FieldValue.serverTimestamp()});
+  if(pren && pren.stato!=='annullato' && pren.stato!=='completato'){
+    task=task.then(function(){
+      return colPrenotazioni.doc(pren.id).update({stato:'annullato',motivoAnnullamento:'Annuncio annullato dal venditore ('+motivo+')',motivoAnnullamentoDettaglio:dettaglio||null,annullatoIl:FieldValue.serverTimestamp()});
+    });
+  }
+  return task.then(function(){toast('Annuncio annullato.','brand');});
+}
+function eseguiAnnullaPrenotazione(id,motivo,dettaglio){
+  var p=PRENOTAZIONI.filter(function(x){return x.id===id;})[0];
+  if(!p)return Promise.reject(new Error('Prenotazione non trovata.'));
+  var hoursLeft=(new Date(p.data+'T'+p.ora).getTime()-Date.now())/3600000;
+  if(hoursLeft<24 && hoursLeft>0){toast('Attenzione: stai annullando con meno di 24 ore di preavviso, come previsto dal regolamento.','warn');}
+  return colPrenotazioni.doc(p.id).update({stato:'annullato',motivoAnnullamento:motivo,motivoAnnullamentoDettaglio:dettaglio||null,annullatoIl:FieldValue.serverTimestamp()})
+    .then(function(){return colLibri.doc(p.libroId).update({stato:'disponibile'});})
+    .then(function(){toast('Prenotazione annullata. Il libro è di nuovo disponibile.','brand');});
+}
+function eseguiAnnullaVendita(id,motivo,dettaglio){
+  var pren=prenotazioneDiLibro(id);
+  var task=colLibri.doc(id).update({stato:'disponibile',prenotatoDa:FieldValue.delete(),motivoAnnullamento:motivo,motivoAnnullamentoDettaglio:dettaglio||null,annullatoIl:FieldValue.serverTimestamp()});
+  if(pren && pren.stato==='completato'){
+    task=task.then(function(){
+      return colPrenotazioni.doc(pren.id).update({stato:'annullato',motivoAnnullamento:'Vendita annullata dal venditore ('+motivo+')',motivoAnnullamentoDettaglio:dettaglio||null,annullatoIl:FieldValue.serverTimestamp()});
+    });
+  }
+  return task.then(function(){toast('Vendita annullata. Il libro è di nuovo disponibile nel catalogo.','brand');});
+}
+function mieiAnnunciClick(e){
+  var btn=e.target.closest('[data-act]');if(!btn)return;
+  var act=btn.dataset.act,id=btn.dataset.id;
+  btn.disabled=true;
+  var task=Promise.resolve();
+  if(act==='venduto')task=colLibri.doc(id).update({stato:'venduto'}).then(function(){toast('Annuncio segnato come venduto.','success');});
+  if(act==='annulla'){openAnnullaModal('annuncio',id);btn.disabled=false;return;}
+  if(act==='annulla-vendita'){openAnnullaModal('vendita',id);btn.disabled=false;return;}
+  if(act==='annulla-pren-venditore'){openAnnullaModal('prenotazione',id);btn.disabled=false;return;}
+  if(act==='ricevuta'){openRicevuta(libro(id));btn.disabled=false;return;}
+  if(act==='conferma-appuntamento')task=colPrenotazioni.doc(id).update({appuntamentoConfermato:true,stato:'confermato'}).then(function(){toast('Appuntamento confermato.','success');});
+  if(act==='completa-venditore')task=completaScambio(id).then(function(){toast('Scambio segnalato come completato: il libro è ora venduto.','success');});
+  if(act==='elimina-libro'){
+    btn.disabled=false;
+    if(!confirm('Eliminare definitivamente questo annuncio venduto dallo storico? L\'azione non è reversibile.'))return;
+    btn.disabled=true;
+    task=colLibri.doc(id).delete().then(function(){toast('Annuncio eliminato.','brand');});
+  }
+  if(act==='elimina-pren'){
+    btn.disabled=false;
+    if(!confirm('Eliminare definitivamente questa prenotazione dallo storico? L\'azione non è reversibile.'))return;
+    btn.disabled=true;
+    task=colPrenotazioni.doc(id).delete().then(function(){toast('Prenotazione eliminata dallo storico.','brand');});
+  }
+  task.catch(function(err){toast('Errore: '+err.message,'warn');}).finally(function(){btn.disabled=false;});
+}
+function completaScambio(prenId){
+  var libroIdToUpdate=null;
+  return db.runTransaction(function(tx){
+    var ref=colPrenotazioni.doc(prenId);
+    return tx.get(ref).then(function(snap){
+      var data=snap.data();
+      libroIdToUpdate=data.libroId;
+      tx.update(ref,{confermaVenditore:true,stato:'completato'});
+    });
+  }).then(function(){
+    return colLibri.doc(libroIdToUpdate).update({stato:'venduto'});
+  });
+}
+function openRicevuta(b){
+  var lt=libroTesto(b.libroTestoId)||{titolo:'(libro di testo non più disponibile)',volume:'',autori:'',editore:'',isbn:'',materia:'',classe:''};
+  var venditoreNome=utenteNomeSoloByUid(b.venditore);
+  var righe=[
+    'RICEVUTA / MODULO DI VENDITA',
+    'Mercatino dei Libri Usati — ISIS D. Vinci · R. Carli · D. Sandrinelli',
+    '',
+    'Libro: '+lt.titolo+' ('+lt.volume+')',
+    'Autori: '+lt.autori+' — '+lt.editore,
+    'ISBN: '+lt.isbn,
+    'Materia / Classe: '+lt.materia+' / '+lt.classe,
+    'Condizione: '+b.condizione,
+    'Prezzo concordato: '+fmtPrice(b.prezzo),
+    'Venditore: '+venditoreNome,
+    'Sede: '+b.sede,
+    'Luogo di scambio: '+b.luogo,
+    '',
+    'Il pagamento avviene direttamente tra le parti, di persona.',
+    'Documento generato dal mercatino — ISIS D. Vinci · R. Carli · D. Sandrinelli.'
+  ];
+  $('#ricevuta-text').textContent=righe.join('\n');
+  $('#ricevuta-download').onclick=function(){downloadRicevutaPDF('ricevuta_'+b.id+'.pdf',righe);};
+  openModal('modal-ricevuta');
+}
+function downloadRicevutaPDF(filename,righe){
+  try{
+    var jsPDFLib = window.jspdf && window.jspdf.jsPDF;
+    if(!jsPDFLib)throw new Error('jsPDF non disponibile');
+    var doc=new jsPDFLib({unit:'mm',format:'a4'});
+    var x=18, y=22, maxWidth=174;
+    righe.forEach(function(riga,i){
+      if(riga===''){y+=4;return;}
+      if(i===0){doc.setFont('helvetica','bold');doc.setFontSize(15);}
+      else if(i===1){doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(90);}
+      else{doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(20);}
+      var lines=doc.splitTextToSize(riga,maxWidth);
+      doc.text(lines,x,y);
+      y+=7*lines.length;
+      if(i===1){y+=4;doc.setDrawColor(200);doc.line(x,y-2,x+maxWidth,y-2);}
+    });
+    doc.save(filename);
+  }catch(e){
+    console.error('Generazione PDF non riuscita, fallback testo:',e);
+    var blob=new Blob([righe.join('\n')],{type:'text/plain'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=filename.replace(/\.pdf$/,'.txt');document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    toast('PDF non disponibile: ricevuta scaricata in formato testo.','warn');
+  }
+}
+
+/* ============================================================
+   LE MIE PRENOTAZIONI (come acquirente)
+   ============================================================ */
+function renderPrenotazioni(){
+  if(!requireAuth('prenotazioni')){$('#prenotazioni-body').innerHTML='';return;}
+  pulisciNotificaAcquirente();
+  var mine=PRENOTAZIONI.filter(function(p){return p.acquirente===currentUser.uid;}).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);});
+  var body=$('#prenotazioni-body');
+  if(!mine.length){body.innerHTML='<div class="empty"><h3>Nessuna prenotazione</h3><p class="small">Sfoglia il catalogo per prenotare un libro.</p></div>';return;}
+  body.innerHTML=mine.map(function(p){
+    var b=libro(p.libroId);var lt=b?libroTesto(b.libroTestoId):null;
+    if(!lt)return '';
+    var actions='';
+    if(p.stato!=='annullato' && p.stato!=='completato'){
+      var hoursLeft=(new Date(p.data+'T'+p.ora).getTime()-Date.now())/3600000;
+      actions+='<button class="icon-btn danger" data-act="annulla-pren" data-id="'+p.id+'">Annulla prenotazione</button>';
+      if(hoursLeft<24 && hoursLeft>0){actions+=' <span class="small" style="color:var(--viola)">meno di 24h dall\'incontro</span>';}
+    }
+    return '<div class="res-card"><div class="res-head"><div><strong>'+esc(lt.titolo)+'</strong><div class="small muted">venduto da '+esc(utenteNomeByUid(p.venditore))+'</div></div><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div>'+
+      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(p)+'</span><span>'+fmtDate(p.data)+' · '+p.ora+'</span></div>'+
+      confirmTrackHTML(p)+
+      (p.stato==='annullato' && p.motivoAnnullamento?'<p class="small muted" style="margin-top:.4rem">Motivo annullamento: '+esc(p.motivoAnnullamento)+(p.motivoAnnullamentoDettaglio?' — '+esc(p.motivoAnnullamentoDettaglio):'')+'</p>':'')+
+      '<div class="row-actions" style="margin-top:.6rem">'+actions+' <button class="icon-btn" data-act="ricevuta" data-id="'+b.id+'">Ricevuta</button></div></div>';
+  }).join('');
+  body.onclick=prenotazioniClick;
+}
+function prenotazioniClick(e){
+  var btn=e.target.closest('[data-act]');if(!btn)return;
+  var act=btn.dataset.act,id=btn.dataset.id;
+  btn.disabled=true;
+  var task=Promise.resolve();
+  if(act==='annulla-pren'){btn.disabled=false;openAnnullaModal('prenotazione',id);return;}
+  if(act==='ricevuta'){openRicevuta(libro(id));btn.disabled=false;return;}
+  task.catch(function(err){toast('Errore: '+err.message,'warn');}).finally(function(){btn.disabled=false;});
+}
+
+/* ============================================================
+   PRENOTAZIONI RICEVUTE (lato venditore)
+   ============================================================ */
+function renderPrenotazioniRicevute(){
+  if(!requireAuth('pren-ricevute')){$('#pren-ricevute-body').innerHTML='';return;}
+  pulisciNotificaPrenRicevute();
+  var ricevute=PRENOTAZIONI.filter(function(p){return p.venditore===currentUser.uid;}).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);});
+  var body=$('#pren-ricevute-body');
+  if(!ricevute.length){body.innerHTML='<div class="empty"><h3>Nessuna prenotazione ricevuta</h3><p class="small">Quando qualcuno prenota un tuo annuncio, lo vedrai qui.</p></div>';return;}
+  body.innerHTML=ricevute.map(function(p){
+    var b=libro(p.libroId);var lt=b?libroTesto(b.libroTestoId):null;
+    if(!b||!lt)return '';
+    var actions='';
+    if(p.stato!=='annullato' && p.stato!=='completato'){
+      if(!p.appuntamentoConfermato){actions='<button class="icon-btn ok" data-act="conferma-appuntamento" data-id="'+p.id+'">Conferma appuntamento</button>';}
+      else{actions='<button class="icon-btn ok" data-act="completa-venditore" data-id="'+p.id+'">Segnala scambio avvenuto</button>';}
+      actions+=' <button class="icon-btn danger" data-act="annulla-pren-venditore" data-id="'+p.id+'">Annulla prenotazione</button>';
+    }else{
+      actions='<button class="icon-btn" data-act="elimina-pren" data-id="'+p.id+'">Elimina</button>';
+    }
+    return '<div class="res-card"><div class="res-head"><div><strong>'+esc(lt.titolo)+'</strong><div class="small muted">prenotato da '+esc(utenteNomeByUid(p.acquirente))+'</div></div><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div>'+
+      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(p)+'</span><span>'+fmtDate(p.data)+' · '+p.ora+'</span></div>'+
+      confirmTrackHTML(p)+
+      (p.stato==='annullato' && p.motivoAnnullamento?'<p class="small muted" style="margin-top:.4rem">Motivo annullamento: '+esc(p.motivoAnnullamento)+(p.motivoAnnullamentoDettaglio?' — '+esc(p.motivoAnnullamentoDettaglio):'')+'</p>':'')+
+      '<div class="row-actions" style="margin-top:.6rem">'+actions+' <button class="icon-btn" data-act="ricevuta" data-id="'+b.id+'">Ricevuta</button></div></div>';
+  }).join('');
+  body.onclick=mieiAnnunciClick;
+}
+
+/* ============================================================
+   ASSISTENZA
+   ============================================================ */
+function renderAssistenza(){
+  if(!requireAuth('assistenza')){$('#assistenza-body').hidden=true;return;}
+  $('#assistenza-body').hidden=false;
+  $('#segnalazione-ok').classList.remove('show');
+  $('#seg-categoria').value='';
+  var mine=SEGNALAZIONI.filter(function(s){return s.utente===currentUser.uid;}).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);});
+  $('#segnalazioni-list').innerHTML = mine.length ? mine.map(function(s){
+    return '<div class="res-card"><div class="res-head"><strong>'+esc(s.categoria)+'</strong><span class="badge '+s.stato+'">'+esc(s.stato.replace('_',' '))+'</span></div></div>';
+  }).join('') : '<p class="small muted">Non hai ancora inviato segnalazioni.</p>';
+}
+$('#segnalazione-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var cat=$('#seg-categoria').value;
+  if(!cat){toast('Scegli una categoria.','warn');return;}
+  var submitBtn=$('#segnalazione-form button[type=submit]');submitBtn.disabled=true;
+  colSegnalazioni.add({utente:currentUser.uid,categoria:cat,stato:'aperta',createdAt:FieldValue.serverTimestamp()})
+    .then(function(){$('#segnalazione-ok').classList.add('show');toast('Segnalazione inviata.','success');renderAssistenza();})
+    .catch(function(err){toast('Errore: '+err.message,'warn');})
+    .finally(function(){submitBtn.disabled=false;});
+});
+
+/* ============================================================
+   PROFILO
+   ============================================================ */
+function renderProfilo(){
+  if(!requireAuth('profilo')){$('#profilo-body').hidden=true;return;}
+  $('#profilo-body').hidden=false;
+  $('#p-nome').value=currentUser.nome;$('#p-cognome').value=currentUser.cognome;
+  $('#p-classe').value=currentUser.classe||'';$('#p-indirizzo').value=currentUser.indirizzo||'';
+  $('#p-email').value=currentUser.email;
+  var mine=PRENOTAZIONI.filter(function(p){return p.acquirente===currentUser.uid;}).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).slice(0,4);
+  $('#profilo-prenotazioni').innerHTML = mine.length ? mine.map(function(p){
+    var b=libro(p.libroId);var lt=b?libroTesto(b.libroTestoId):null;if(!lt)return '';
+    return '<div class="res-card"><div class="res-head"><strong>'+esc(lt.titolo)+'</strong><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div><p class="small muted">'+fmtDate(p.data)+' · '+p.ora+'</p></div>';
+  }).join('') : '<p class="small muted">Nessuna prenotazione recente.</p>';
+}
+$('#profilo-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var patch={
+    nome:$('#p-nome').value.trim()||currentUser.nome,
+    cognome:$('#p-cognome').value.trim()||currentUser.cognome,
+    classe:$('#p-classe').value.trim(),
+    indirizzo:$('#p-indirizzo').value.trim()
+  };
+  var submitBtn=$('#profilo-form button[type=submit]');submitBtn.disabled=true;
+  colUtenti.doc(currentUser.uid).update(patch).then(function(){
+    Object.assign(currentUser,patch);updateAuthUI();toast('Profilo aggiornato.','success');
+  }).catch(function(err){toast('Errore: '+err.message,'warn');}).finally(function(){submitBtn.disabled=false;});
+});
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+var adminTab='annunci';
+function renderAdmin(){
+  if(!requireAuth('admin','admin')){$('#admin-body').hidden=true;return;}
+  $('#admin-body').hidden=false;
+  renderAdminStats();
+  renderAdminPanel();
+}
+function renderAdminStats(){
+  $('#admin-stats').innerHTML=[
+    ['Libri totali',LIBRI.length],
+    ['Disponibili',LIBRI.filter(function(b){return b.stato==='disponibile';}).length],
+    ['Prenotati',LIBRI.filter(function(b){return b.stato==='prenotato';}).length],
+    ['Venduti',LIBRI.filter(function(b){return b.stato==='venduto';}).length],
+    ['Utenti',Object.keys(UTENTI_BY_UID).length],
+    ['Segnalazioni aperte',SEGNALAZIONI.filter(function(s){return s.stato==='aperta';}).length]
+  ].map(function(s){return '<div class="stat-card"><b>'+s[1]+'</b><span>'+s[0]+'</span></div>';}).join('');
+  $('#cnt-prenot').textContent=PRENOTAZIONI.length;
+  $('#cnt-seg').textContent=SEGNALAZIONI.filter(function(s){return s.stato==='aperta';}).length;
+}
+$$('.tab[data-admin-tab]').forEach(function(t){
+  t.addEventListener('click',function(){
+    $$('.tab[data-admin-tab]').forEach(function(x){x.setAttribute('aria-selected','false');});
+    t.setAttribute('aria-selected','true');adminTab=t.dataset.adminTab;renderAdminPanel();
+  });
+});
+function renderAdminPanel(){
+  if(!currentUser || currentUser.ruolo!=='admin')return;
+  var el=$('#admin-panel-body');
+  if(adminTab==='annunci')el.innerHTML=adminAnnunciHTML();
+  else if(adminTab==='classi')el.innerHTML=adminClassiHTML();
+  else if(adminTab==='prenotazioni')el.innerHTML=adminPrenotazioniHTML();
+  else if(adminTab==='segnalazioni')el.innerHTML=adminSegnalazioniHTML();
+  else if(adminTab==='utenti')el.innerHTML=adminUtentiHTML();
+  wireAdminPanel();
+}
+function adminAnnunciHTML(){
+  var rows=LIBRI.slice().sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).map(function(b){
+    var lt=libroTesto(b.libroTestoId);if(!lt)return '';
+    var act = b.stato==='disattivato' ?
+      '<button class="icon-btn ok" data-act="riattiva" data-id="'+b.id+'">Riattiva</button>' :
+      '<button class="icon-btn danger" data-act="disattiva" data-id="'+b.id+'">Disattiva</button>';
+    return '<tr><td><strong>'+esc(lt.titolo)+'</strong><br/><span class="small muted">'+esc(lt.classe)+' · '+esc(b.condizione)+'</span></td>'+
+      '<td>'+esc(utenteNomeByUid(b.venditore))+'</td><td class="price">'+fmtPrice(b.prezzo)+'</td>'+
+      '<td><span class="badge '+b.stato+'">'+esc(STATO_LIBRO_LABEL[b.stato])+'</span></td>'+
+      '<td><div class="row-actions">'+act+'</div></td></tr>';
+  }).join('');
+  return '<div class="table-wrap"><table><thead><tr><th>Libro</th><th>Venditore</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" style="text-align:center;padding:2rem">Nessun annuncio.</td></tr>')+'</tbody></table></div>';
+}
+function adminPrenotazioniHTML(){
+  var rows=PRENOTAZIONI.slice().sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).map(function(p){
+    var b=libro(p.libroId);var lt=b?libroTesto(b.libroTestoId):null;if(!lt)return '';
+    return '<tr><td>'+esc(lt.titolo)+'</td><td>'+esc(utenteNomeByUid(p.acquirente))+'</td><td>'+esc(utenteNomeByUid(p.venditore))+'</td><td>'+fmtDate(p.data)+' · '+p.ora+'</td><td><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></td></tr>';
+  }).join('');
+  return '<div class="table-wrap"><table><thead><tr><th>Libro</th><th>Acquirente</th><th>Venditore</th><th>Data</th><th>Stato</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" style="text-align:center;padding:2rem">Nessuna prenotazione.</td></tr>')+'</tbody></table></div>';
+}
+function adminSegnalazioniHTML(){
+  var rows=SEGNALAZIONI.slice().sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).map(function(s){
+    return '<tr><td>'+esc(utenteNomeByUid(s.utente))+'</td><td>'+esc(s.categoria)+'</td><td>'+
+      '<select class="select" style="padding:.4rem .6rem;min-width:150px" data-act="stato-seg" data-id="'+s.id+'">'+
+      ['aperta','in_lavorazione','risolta'].map(function(st){return '<option value="'+st+'"'+(s.stato===st?' selected':'')+'>'+st.replace('_',' ')+'</option>';}).join('')+
+      '</select></td></tr>';
+  }).join('');
+  return '<div class="table-wrap"><table><thead><tr><th>Utente</th><th>Categoria</th><th>Stato</th></tr></thead><tbody>'+(rows||'<tr><td colspan="3" style="text-align:center;padding:2rem">Nessuna segnalazione.</td></tr>')+'</tbody></table></div>';
+}
+function adminUtentiHTML(){
+  var rows=Object.values(UTENTI_BY_UID).map(function(u){
+    return '<tr><td>'+esc(u.nome+' '+u.cognome)+'</td><td>'+esc(u.email)+'</td><td>'+esc(u.classe||'—')+'</td><td><span class="role-pill" style="background:'+(u.ruolo==='admin'?'var(--viola)':'var(--grigio-500)')+'">'+esc(u.ruolo)+'</span></td></tr>';
+  }).join('');
+  return '<div class="table-wrap"><table><thead><tr><th>Nome</th><th>Email</th><th>Classe</th><th>Ruolo</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4" style="text-align:center;padding:2rem">Nessun utente.</td></tr>')+'</tbody></table></div>';
+}
+function adminClassiHTML(){
+  var classiChips=CLASSI.map(function(c){return '<span class="tag">'+esc(c)+'<button type="button" data-act="rm-classe" data-c="'+esc(c)+'">×</button></span>';}).join('');
+  var libriRows=LIBRITESTO.slice().sort(function(a,b){return a.classe.localeCompare(b.classe);}).map(function(l){
+    return '<tr><td>'+esc(l.classe)+'</td><td>'+esc(l.materia)+'</td><td>'+esc(l.titolo)+'</td><td>'+esc(l.autori)+'</td><td>'+esc(l.isbn)+'</td><td>'+(l.prezzo!=null?fmtPrice(l.prezzo):'—')+'</td><td><button class="icon-btn danger" data-act="rm-libro" data-id="'+l.id+'">Rimuovi</button></td></tr>';
+  }).join('');
+  return '<div class="card" style="margin-top:1rem">'+
+    '<div class="section-title" style="margin-top:0">Classi</div>'+
+    '<div class="tag-list">'+classiChips+'</div>'+
+    '<div class="chip-input-row"><input class="input" id="nc-input" placeholder="Es. 1C" /><button type="button" class="btn btn-outline btn-sm" id="nc-add">Aggiungi classe</button></div>'+
+    '<div class="section-title">Libri di testo adottati</div>'+
+    '<div class="table-wrap"><table><thead><tr><th>Classe</th><th>Materia</th><th>Titolo</th><th>Autori</th><th>ISBN</th><th>Prezzo</th><th></th></tr></thead><tbody>'+(libriRows||'<tr><td colspan="7" style="text-align:center;padding:1.4rem">Nessun libro caricato.</td></tr>')+'</tbody></table></div>'+
+    '<div class="section-title">Aggiungi libro di testo manualmente</div>'+
+    '<div class="form-grid">'+
+    '<div class="field"><label>Classe</label><select class="select" id="lt-classe">'+CLASSI.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select></div>'+
+    '<div class="field"><label>Materia</label><input class="input" id="lt-materia" /></div>'+
+    '<div class="field"><label>Titolo</label><input class="input" id="lt-titolo" /></div>'+
+    '<div class="field"><label>Volume</label><input class="input" id="lt-volume" /></div>'+
+    '<div class="field"><label>Autori</label><input class="input" id="lt-autori" /></div>'+
+    '<div class="field"><label>Editore</label><input class="input" id="lt-editore" /></div>'+
+    '<div class="field"><label>ISBN</label><input class="input" id="lt-isbn" /></div>'+
+    '<div class="field"><label>Prezzo indicativo (€, facoltativo)</label><input class="input" id="lt-prezzo" type="number" min="0" step="0.5" /></div>'+
+    '</div><button type="button" class="btn btn-outline" id="lt-add">Aggiungi manualmente</button>'+
+
+    '<div class="section-title">Carica libri di testo da Excel</div>'+
+    '<p class="field-hint" style="margin-bottom:.8rem">La tabella deve avere le colonne <strong>Materia, Autori, Titolo, Volume, Editore, Codice ISBN, Prezzo</strong> (Prezzo facoltativo). Le colonne vengono riconosciute dall\'intestazione, in qualsiasi ordine. <strong>Il caricamento sostituisce</strong> l\'elenco già presente per la classe scelta qui sotto.</p>'+
+    '<div class="form-grid">'+
+    '<div class="field"><label>Classe di destinazione</label><select class="select" id="imp-classe">'+CLASSI.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select></div>'+
+    '<div class="field"><label>File Excel (.xlsx, .xls)</label><input type="file" class="input" id="imp-file" accept=".xlsx,.xls" /></div>'+
+    '</div>'+
+    '<button type="button" class="btn btn-ghost btn-sm" id="imp-template" style="margin-bottom:1rem">⬇️ Scarica modello Excel</button>'+
+    '<div id="imp-preview"></div>'+
+    '</div>';
+}
+function excelTemplateRows(){
+  return [
+    ['Materia','Autori','Titolo','Volume','Editore','Codice ISBN','Prezzo'],
+    ['Matematica','M. Bergamini, A. Trifone','Matematica.blu 2.0','Vol. 1','Zanichelli','9788808720801','18']
+  ];
+}
+function scaricaModelloExcel(){
+  if(typeof XLSX==='undefined'){toast('Libreria Excel non disponibile.','warn');return;}
+  var ws=XLSX.utils.aoa_to_sheet(excelTemplateRows());
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Libri');
+  XLSX.writeFile(wb,'modello_libri_di_testo.xlsx');
+}
+var excelParsedBooks=[];
+function leggiCampo(row,chiaviPossibili){
+  for(var k in row){
+    if(Object.prototype.hasOwnProperty.call(row,k) && chiaviPossibili.indexOf(k.trim().toLowerCase())!==-1)return String(row[k]).trim();
+  }
+  return '';
+}
+function handleExcelFile(ev){
+  var file=ev.target.files[0];
+  var preview=$('#imp-preview');
+  excelParsedBooks=[];
+  if(!file){preview.innerHTML='';return;}
+  if(typeof XLSX==='undefined'){toast('Libreria Excel non disponibile.','warn');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
+      excelParsedBooks=rows.map(function(row){
+        var prezzoStr=leggiCampo(row,['prezzo']);
+        var prezzo=prezzoStr!==''?parseFloat(prezzoStr.replace(',','.')):null;
+        return {
+          materia:leggiCampo(row,['materia']),
+          autori:leggiCampo(row,['autori','autore']),
+          titolo:leggiCampo(row,['titolo']),
+          volume:leggiCampo(row,['volume','vol']),
+          editore:leggiCampo(row,['editore']),
+          isbn:leggiCampo(row,['codice isbn','isbn','codice']),
+          prezzo:(prezzo!=null && !isNaN(prezzo))?prezzo:null
+        };
+      }).filter(function(b){return b.titolo;});
+      renderAnteprimaImportLibri();
+    }catch(err){
+      preview.innerHTML='<p class="field-hint" style="color:var(--arancio-scuro)">Errore nella lettura del file: '+esc(err.message)+'</p>';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+function renderAnteprimaImportLibri(){
+  var preview=$('#imp-preview');
+  if(!excelParsedBooks.length){
+    preview.innerHTML='<p class="field-hint" style="color:var(--arancio-scuro)">Nessun libro riconosciuto nel file. Controlla che la tabella abbia le colonne Materia, Autori, Titolo, Volume, Editore, Codice ISBN (in qualsiasi ordine), oppure scarica il modello.</p>';
+    return;
+  }
+  var rows=excelParsedBooks.map(function(b,i){
+    function cell(field,val,width){return '<td><input class="input" style="font-size:.8rem;padding:.4rem .55rem;min-width:'+width+'px" value="'+esc(val)+'" data-i="'+i+'" data-f="'+field+'" /></td>';}
+    return '<tr>'+cell('materia',b.materia,100)+cell('autori',b.autori,150)+cell('titolo',b.titolo,170)+cell('volume',b.volume,70)+cell('editore',b.editore,110)+cell('isbn',b.isbn,120)+cell('prezzo',b.prezzo==null?'':b.prezzo,70)+
+      '<td><button type="button" class="icon-btn danger" data-act="imp-rm" data-i="'+i+'">✕</button></td></tr>';
+  }).join('');
+  preview.innerHTML='<p class="field-hint" style="color:var(--verde-scuro);margin-bottom:.6rem">'+excelParsedBooks.length+' libri riconosciuti. Controlla e correggi l\'anteprima se serve, poi conferma.</p>'+
+    '<div class="table-wrap"><table><thead><tr><th>Materia</th><th>Autori</th><th>Titolo</th><th>Volume</th><th>Editore</th><th>Codice ISBN</th><th>Prezzo</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<button type="button" class="btn btn-primary" id="imp-confirm" style="margin-top:1rem">Conferma caricamento ('+excelParsedBooks.length+' libri)</button>';
+  preview.querySelectorAll('input[data-f]').forEach(function(inp){
+    inp.addEventListener('input',function(){
+      var i=+inp.dataset.i,f=inp.dataset.f;
+      excelParsedBooks[i][f]= f==='prezzo' ? (inp.value===''?null:parseFloat(inp.value)) : inp.value;
+    });
+  });
+  preview.querySelectorAll('[data-act="imp-rm"]').forEach(function(b){
+    b.addEventListener('click',function(){excelParsedBooks.splice(+b.dataset.i,1);renderAnteprimaImportLibri();});
+  });
+  var confirmBtn=preview.querySelector('#imp-confirm');
+  if(confirmBtn)confirmBtn.addEventListener('click',confermaImportLibri);
+}
+function confermaImportLibri(){
+  var classeTarget=$('#imp-classe').value;
+  if(!classeTarget){toast('Scegli la classe di destinazione.','warn');return;}
+  if(!excelParsedBooks.length){toast('Nessun libro da caricare.','warn');return;}
+  var confirmBtn=$('#imp-confirm');if(confirmBtn)confirmBtn.disabled=true;
+  colLibriTesto.where('classe','==',classeTarget).get().then(function(snap){
+    var batch=db.batch();
+    snap.docs.forEach(function(d){batch.delete(d.ref);});
+    excelParsedBooks.forEach(function(b){
+      var ref=colLibriTesto.doc();
+      batch.set(ref,{classe:classeTarget,materia:b.materia,autori:b.autori,titolo:b.titolo,volume:b.volume||'Vol. unico',editore:b.editore,isbn:b.isbn,prezzo:b.prezzo});
+    });
+    return batch.commit();
+  }).then(function(){
+    toast(excelParsedBooks.length+' libri caricati per la classe '+classeTarget+' (elenco precedente sostituito).','success');
+    excelParsedBooks=[];
+    var fileInput=$('#imp-file');if(fileInput)fileInput.value='';
+    renderAdminPanel();
+  }).catch(function(err){
+    toast('Errore: '+err.message,'warn');
+    if(confirmBtn)confirmBtn.disabled=false;
+  });
+}
+function wireAdminPanel(){
+  var el=$('#admin-panel-body');
+  el.querySelectorAll('[data-act="disattiva"]').forEach(function(b){b.addEventListener('click',function(){colLibri.doc(b.dataset.id).update({stato:'disattivato'}).then(function(){toast('Annuncio disattivato (non eliminato fisicamente).','brand');}).catch(function(err){toast('Errore: '+err.message,'warn');});});});
+  el.querySelectorAll('[data-act="riattiva"]').forEach(function(b){b.addEventListener('click',function(){colLibri.doc(b.dataset.id).update({stato:'disponibile'}).then(function(){toast('Annuncio riattivato.','success');}).catch(function(err){toast('Errore: '+err.message,'warn');});});});
+  el.querySelectorAll('[data-act="stato-seg"]').forEach(function(s){s.addEventListener('change',function(){
+    colSegnalazioni.doc(s.dataset.id).update({stato:s.value}).then(function(){toast('Stato segnalazione aggiornato.','success');}).catch(function(err){toast('Errore: '+err.message,'warn');});
+  });});
+  var ncAdd=el.querySelector('#nc-add');
+  if(ncAdd)ncAdd.addEventListener('click',function(){
+    var v=el.querySelector('#nc-input').value.trim().toUpperCase();
+    if(!v)return;
+    colClassi.doc(v).set({classe:v}).then(function(){toast('Classe aggiunta.','success');}).catch(function(err){toast('Errore: '+err.message,'warn');});
+  });
+  el.querySelectorAll('[data-act="rm-classe"]').forEach(function(b){b.addEventListener('click',function(){
+    colClassi.doc(b.dataset.c).delete().then(function(){toast('Classe rimossa.','brand');}).catch(function(err){toast('Errore: '+err.message,'warn');});
+  });});
+  el.querySelectorAll('[data-act="rm-libro"]').forEach(function(b){b.addEventListener('click',function(){
+    colLibriTesto.doc(b.dataset.id).delete().then(function(){toast('Libro di testo rimosso dal catalogo adozioni.','brand');}).catch(function(err){toast('Errore: '+err.message,'warn');});
+  });});
+  var ltAdd=el.querySelector('#lt-add');
+  if(ltAdd)ltAdd.addEventListener('click',function(){
+    var classe=el.querySelector('#lt-classe').value,materia=el.querySelector('#lt-materia').value.trim();
+    var titolo=el.querySelector('#lt-titolo').value.trim(),volume=el.querySelector('#lt-volume').value.trim()||'Vol. unico';
+    var autori=el.querySelector('#lt-autori').value.trim(),editore=el.querySelector('#lt-editore').value.trim(),isbn=el.querySelector('#lt-isbn').value.trim();
+    var prezzoRaw=el.querySelector('#lt-prezzo').value;var prezzo=prezzoRaw===''?null:parseFloat(prezzoRaw);
+    if(!materia||!titolo||!autori||!editore||!isbn){toast('Compila tutti i campi del libro di testo.','warn');return;}
+    colLibriTesto.add({classe:classe,materia:materia,autori:autori,titolo:titolo,volume:volume,editore:editore,isbn:isbn,prezzo:(prezzo!=null&&!isNaN(prezzo))?prezzo:null})
+      .then(function(){toast('Libro di testo aggiunto.','success');})
+      .catch(function(err){toast('Errore: '+err.message,'warn');});
+  });
+  var impFile=el.querySelector('#imp-file');
+  if(impFile)impFile.addEventListener('change',handleExcelFile);
+  var impTemplate=el.querySelector('#imp-template');
+  if(impTemplate)impTemplate.addEventListener('click',scaricaModelloExcel);
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+updateAuthUI();
+showView('catalogo');
+})();
+</script>
+</body>
+</html>
