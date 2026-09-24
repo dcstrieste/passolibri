@@ -1813,16 +1813,40 @@ function renderAdminPanel(){
 }
 function adminAnnunciHTML(){
   var rows=LIBRI.slice().sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).map(function(b){
-    var lt=libroTesto(b.libroTestoId);if(!lt)return '';
+    var lt=libroTesto(b.libroTestoId)||{titolo:'(libro di testo non più in catalogo)',classe:'—'};
     var act = b.stato==='disattivato' ?
       '<button class="icon-btn ok" data-act="riattiva" data-id="'+b.id+'">Riattiva</button>' :
       '<button class="icon-btn danger" data-act="disattiva" data-id="'+b.id+'">Disattiva</button>';
-    return '<tr><td><strong>'+esc(lt.titolo)+'</strong><br/><span class="small muted">'+esc(lt.classe)+' · '+esc(b.condizione)+'</span></td>'+
+    act+=' <button class="icon-btn" data-act="admin-elimina" data-id="'+b.id+'">Elimina</button>';
+    return '<tr><td><input type="checkbox" class="sel-check" data-id="'+b.id+'" aria-label="Seleziona annuncio"></td>'+
+      '<td><strong>'+esc(lt.titolo)+'</strong><br/><span class="small muted">'+esc(lt.classe)+' · '+esc(b.condizione)+'</span></td>'+
       '<td>'+esc(utenteNomeByUid(b.venditore))+'</td><td class="price">'+fmtPrice(b.prezzo)+'</td>'+
       '<td><span class="badge '+b.stato+'">'+esc(STATO_LIBRO_LABEL[b.stato])+'</span></td>'+
       '<td><div class="row-actions">'+act+'</div></td></tr>';
   }).join('');
-  return '<div class="table-wrap"><table><thead><tr><th>Libro</th><th>Venditore</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" style="text-align:center;padding:2rem">Nessun annuncio.</td></tr>')+'</tbody></table></div>';
+  var toolbar='<div class="bulk-toolbar"><label class="bulk-all"><input type="checkbox" id="admin-annunci-select-all"> Seleziona tutto</label>'+
+    '<span class="small muted" id="admin-annunci-count">0 selezionati</span>'+
+    '<button class="icon-btn danger" id="admin-annunci-delete-sel" disabled>Elimina selezionati</button></div>';
+  return toolbar+'<div class="table-wrap"><table><thead><tr><th style="width:36px"></th><th>Libro</th><th>Venditore</th><th>Prezzo</th><th>Stato</th><th>Azioni</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6" style="text-align:center;padding:2rem">Nessun annuncio.</td></tr>')+'</tbody></table></div>';
+}
+/* Eliminazione definitiva di annunci da parte dell'admin (insieme alle prenotazioni collegate) */
+function adminEliminaLibri(ids){
+  var n=ids.length;
+  var pren=PRENOTAZIONI.filter(function(p){return ids.indexOf(p.libroId)!==-1;});
+  var msg='Eliminare definitivamente '+n+' '+(n===1?'annuncio':'annunci')+' dal catalogo?';
+  if(pren.length)msg+='\nVerr'+(pren.length===1?'à eliminata anche 1 prenotazione collegata':'anno eliminate anche '+pren.length+' prenotazioni collegate')+'.';
+  msg+='\nL\'azione non è reversibile.';
+  if(!confirm(msg))return Promise.resolve(false);
+  var ops=[];
+  ids.forEach(function(id){ops.push(colLibri.doc(id));});
+  pren.forEach(function(p){ops.push(colPrenotazioni.doc(p.id));});
+  var chunks=[];for(var i=0;i<ops.length;i+=400)chunks.push(ops.slice(i,i+400));
+  return chunks.reduce(function(chain,chunk){
+    return chain.then(function(){var batch=db.batch();chunk.forEach(function(ref){batch.delete(ref);});return batch.commit();});
+  },Promise.resolve()).then(function(){
+    toast(n+' '+(n===1?'annuncio eliminato':'annunci eliminati')+' dal catalogo.','brand');
+    return true;
+  });
 }
 function adminPrenotazioniHTML(){
   var rows=PRENOTAZIONI.slice().sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).map(function(p){
@@ -1983,6 +2007,31 @@ function wireAdminPanel(){
   var el=$('#admin-panel-body');
   el.querySelectorAll('[data-act="disattiva"]').forEach(function(b){b.addEventListener('click',function(){colLibri.doc(b.dataset.id).update({stato:'disattivato'}).then(function(){toast('Annuncio disattivato (non eliminato fisicamente).','brand');}).catch(function(err){toast('Errore: '+err.message,'warn');});});});
   el.querySelectorAll('[data-act="riattiva"]').forEach(function(b){b.addEventListener('click',function(){colLibri.doc(b.dataset.id).update({stato:'disponibile'}).then(function(){toast('Annuncio riattivato.','success');}).catch(function(err){toast('Errore: '+err.message,'warn');});});});
+    el.querySelectorAll('[data-act="admin-elimina"]').forEach(function(b){b.addEventListener('click',function(){
+    b.disabled=true;
+    adminEliminaLibri([b.dataset.id]).catch(function(err){toast('Errore: '+err.message,'warn');}).then(function(){b.disabled=false;});
+  });});
+  var aSel=el.querySelector('#admin-annunci-select-all');
+  if(aSel){
+    var aDel=el.querySelector('#admin-annunci-delete-sel'),aCnt=el.querySelector('#admin-annunci-count');
+    var aChecks=function(){return Array.prototype.slice.call(el.querySelectorAll('.sel-check'));};
+    var aRefresh=function(){
+      var all=aChecks(),on=all.filter(function(c){return c.checked;});
+      aCnt.textContent=on.length+' '+(on.length===1?'selezionato':'selezionati');
+      aDel.disabled=on.length===0;
+      aSel.checked=all.length>0&&on.length===all.length;
+      aSel.indeterminate=on.length>0&&on.length<all.length;
+    };
+    aChecks().forEach(function(c){c.addEventListener('change',aRefresh);});
+    aSel.addEventListener('change',function(){aChecks().forEach(function(c){c.checked=aSel.checked;});aRefresh();});
+    aDel.addEventListener('click',function(){
+      var ids=aChecks().filter(function(c){return c.checked;}).map(function(c){return c.dataset.id;});
+      if(!ids.length)return;
+      aDel.disabled=true;
+      adminEliminaLibri(ids).catch(function(err){toast('Errore: '+err.message,'warn');}).then(function(){aRefresh();});
+    });
+    aRefresh();
+  }
   el.querySelectorAll('[data-act="stato-seg"]').forEach(function(s){s.addEventListener('change',function(){
     colSegnalazioni.doc(s.dataset.id).update({stato:s.value}).then(function(){toast('Stato segnalazione aggiornato.','success');}).catch(function(err){toast('Errore: '+err.message,'warn');});
   });});
