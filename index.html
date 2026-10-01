@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Mercatino dei Libri Usati — ISIS D. Vinci · R. Carli · D. Sandrinelli</title>
+<title>Mercatino dei Libri Usati — I.S.I.S. da Vinci - G.R. Carli - de Sandrinelli</title>
 <meta name="description" content="Il mercatino dei libri usati della scuola: compra, prenota e vendi testi scolastici tra studenti." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -621,7 +621,7 @@ footer{background:var(--ink);color:var(--carta);margin-top:2.4rem;padding-bottom
         <div class="highlight-box"><p>🔒 Questa piattaforma raccoglie solo i dati strettamente necessari al suo funzionamento. Nessun dato personale viene reso pubblico agli altri utenti al di fuori di quanto necessario per lo scambio.</p></div>
 
         <h2>1. Titolare del trattamento</h2>
-        <p>Il titolare del trattamento è l'ISIS d. Vinci – R. Carli – d. Sandrinelli, in qualità di soggetto che gestisce la piattaforma a scopo non commerciale.</p>
+        <p>Il titolare del trattamento è l'I.S.I.S. da Vinci - G.R. Carli - de Sandrinelli, in qualità di soggetto che gestisce la piattaforma a scopo non commerciale.</p>
 
         <h2>2. Dati raccolti</h2>
         <p>La piattaforma raccoglie esclusivamente:</p>
@@ -732,7 +732,7 @@ footer{background:var(--ink);color:var(--carta);margin-top:2.4rem;padding-bottom
 <footer>
   <div class="container school-credit">
     <span><b>Mercatino dei Libri Usati</b> — Ideato e curato da Prof. Salvatore D'Agata con il supporto di tecnologie di IA © 2026.</span>
-    <span>ISIS D. Vinci · R. Carli · D. Sandrinelli</span>
+    <span><title>I.S.I.S. da Vinci - G.R. Carli - de Sandrinelli</span>
   </div>
 </footer>
 
@@ -2085,7 +2085,7 @@ function openRicevuta(b){
   var venditoreNome=utenteNomeSoloByUid(b.venditore);
   var righe=[
     'RICEVUTA / MODULO DI VENDITA',
-    'Mercatino dei Libri Usati — ISIS D. Vinci · R. Carli · D. Sandrinelli',
+    'Mercatino dei Libri Usati — I.S.I.S. da Vinci - G.R. Carli - de Sandrinelli',
     '',
     'Libro: '+lt.titolo+' ('+lt.volume+')',
     'Autori: '+lt.autori+' — '+lt.editore,
@@ -2098,7 +2098,7 @@ function openRicevuta(b){
     'Luogo di scambio: '+b.luogo,
     '',
     'Il pagamento avviene direttamente tra le parti, di persona.',
-    'Documento generato dal mercatino — ISIS D. Vinci · R. Carli · D. Sandrinelli.'
+    'Documento generato dal mercatino — I.S.I.S. da Vinci - G.R. Carli - de Sandrinelli'
   ];
   $('#ricevuta-text').textContent=righe.join('\n');
   $('#ricevuta-download').onclick=function(){downloadRicevutaPDF('ricevuta_'+b.id+'.pdf',righe);};
