@@ -290,7 +290,7 @@ tbody tr:hover{background:rgba(255,147,2,.05)}
 .dl dd{margin:0}
 
 /* TOAST */
-.toast-stack{position:fixed;top:calc(128px + env(safe-area-inset-top,0px));
+.toast-stack{position:fixed;top:calc(128px + env(safe-area-inset-top,0px));right:1rem;z-index:300;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
 .toast{display:flex;align-items:center;gap:.6rem;pointer-events:auto;background:var(--ink);color:var(--carta);padding:.8rem 1.1rem;border-radius:var(--r-m);font-size:.86rem;font-weight:500;box-shadow:0 14px 34px -10px rgba(27,26,23,.5);border-left:4px solid var(--ciano);max-width:320px;animation:toastIn .3s var(--ease)}
 .toast.success{border-left-color:var(--verde)}
 .toast.warn{border-left-color:var(--viola)}
