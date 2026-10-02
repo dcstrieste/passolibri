@@ -910,6 +910,7 @@ var firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 var auth = firebase.auth();
 var db = firebase.firestore();
+db.enablePersistence({synchronizeTabs:true}).catch(function(){});
 var FieldValue = firebase.firestore.FieldValue;
 
 var DOMAIN = 'dcstrieste.it';
@@ -1395,21 +1396,30 @@ function requireAuth(viewId, roleNeeded){
    — libri/utenti/richieste: leggibili da chiunque sia autenticato con dominio scuola
    — prenotazioni/segnalazioni: l'admin vede tutto, gli altri solo le proprie
    ============================================================ */
-colClassi.onSnapshot(function(snap){
-  CLASSI=snap.docs.map(function(d){return d.id;}).sort();
-  refreshClassiSelects();
-  if(activeViewName()==='admin')renderAdminPanel();
-},function(err){console.error('classisezioni',err);});
-
-colLibriTesto.onSnapshot(function(snap){
-  LIBRITESTO=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
-  refreshMaterieSelect();
-  refreshTitoloIsbnSelects();
-  if(!currentUser)return;
-  var v=activeViewName();
-  if(v==='vendi'){refreshLibroSelect();} // aggiorna la select in live senza svuotare il form già compilato
-  else renderView(v);
-},function(err){console.error('libritesto',err);});
+function caricaConCache(chiave, col, ttlMs){
+  try{
+    var c=JSON.parse(localStorage.getItem(chiave)||'null');
+    if(c && Date.now()-c.t<ttlMs) return Promise.resolve(c.d);
+  }catch(e){}
+  return col.get().then(function(snap){
+    var d=snap.docs.map(function(x){return Object.assign({id:x.id},x.data());});
+    try{localStorage.setItem(chiave,JSON.stringify({t:Date.now(),d:d}));}catch(e){}
+    return d;
+  });
+}
+function caricaAdozioni(forza){
+  var ttl=forza?0:6*3600*1000; // 6 ore
+  return Promise.all([
+    caricaConCache('mc_classi',colClassi,ttl),
+    caricaConCache('mc_libritesto',colLibriTesto,ttl)
+  ]).then(function(r){
+    CLASSI=r[0].map(function(c){return c.id;}).sort();
+    LIBRITESTO=r[1];
+    refreshClassiSelects();refreshMaterieSelect();refreshTitoloIsbnSelects();
+    if(currentUser)render();
+  });
+}
+caricaAdozioni();
 
 function attachSessionListeners(){
   detachSessionListeners();
