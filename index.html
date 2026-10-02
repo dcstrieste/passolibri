@@ -1,3 +1,4 @@
+HTML DEFINITIVO CON LOGO NUOVO
 <!doctype html>
 <html lang="it">
 <head>
@@ -992,12 +993,12 @@ function libroTesto(id){return LIBRITESTO.filter(function(l){return l.id===id;})
 function libro(id){return LIBRI.filter(function(b){return b.id===id;})[0];}
 function prenotazioneDiLibro(bookId){var list=PRENOTAZIONI.filter(function(p){return p.libroId===bookId && p.stato!=='annullato';});return list[list.length-1];}
 function notificaNuovaPrenotazione(p){
-  caricaUtenti([p.acquirente]).then(function(){
-    var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
-    var titolo=lt?lt.titolo:'un tuo libro';
-    toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
-    setNotifDot('notif-dot-item');
-  });
+  // Solo popup + pallino: l'email è già inviata in modo affidabile da openPrenotaModal
+  // (triggerata da chi prenota, non da questo listener che dipende dal venditore online).
+  var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
+  var titolo=lt?lt.titolo:'un tuo libro';
+  toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
+  setNotifDot('notif-dot-item');
 }
 function setNotifDot(id){var el=$('#'+id);if(el)el.hidden=false;updateNotifToggle();}
 function clearNotifDot(id){var el=$('#'+id);if(el)el.hidden=true;updateNotifToggle();}
@@ -1148,15 +1149,14 @@ function toast(msg,type){
    ============================================================ */
 // Dopo aver pubblicato lo script Google Apps Script, incolla qui l'URL che termina con /exec
 var NOTIFY_URL = 'https://script.google.com/macros/s/AKfycbxeDdS0_c7hR_BGm-P7R79IyV7ntgxkZz_mESYrxRYDewE5B2Gq9JaJ3K3loKVAwlXU7g/exec';
-function inviaEmail(to,tipo,dati){
-  if(!to || !NOTIFY_URL || !auth.currentUser)return;
-  dati=dati||{};
-  auth.currentUser.getIdToken().then(function(token){
-    return fetch(NOTIFY_URL,{
-      method:'POST',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({token:token,to:to,tipo:tipo,titolo:dati.titolo||'',nome:dati.nome||''})
-    });
+var NOTIFY_KEY = 'k7Qm2xVw9RtB4nLp8ZcY';
+function inviaEmail(to,subject,html){
+  if(!to || !NOTIFY_URL)return;
+  // Content-Type text/plain: evita la richiesta di preflight CORS, che Apps Script non supporta
+  fetch(NOTIFY_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({key:NOTIFY_KEY,to:to,subject:subject,html:html})
   }).then(function(r){return r.text();}).then(function(t){
     try{var j=JSON.parse(t);if(!j.ok)console.error('invio email non riuscito:',j.error);}catch(e){}
   }).catch(function(err){console.error('invio email non riuscito',err);});
@@ -1449,17 +1449,15 @@ function attachSessionListeners(){
     }
     LIBRI=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     libriInitialLoaded=true;
-    caricaUtenti(LIBRI.map(function(b){return b.venditore;}));
     rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','admin','profilo','richieste']);
   },function(err){console.error('libri',err);}));
 
- if(currentUser.ruolo==='admin'){
   boundUnsubs.push(colUtenti.onSnapshot(function(snap){
     UTENTI_BY_UID={};
     snap.docs.forEach(function(d){UTENTI_BY_UID[d.id]=Object.assign({uid:d.id},d.data());});
     rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','admin','richieste']);
   },function(err){console.error('utenti',err);}));
-}
+
   var richiesteInitialLoaded=false;
   var richiestePrevById={};
   boundUnsubs.push(colRichieste.onSnapshot(function(snap){
@@ -1482,7 +1480,6 @@ function attachSessionListeners(){
     richiestePrevById={};
     RICHIESTE=snap.docs.map(function(d){var r=Object.assign({id:d.id},d.data());richiestePrevById[r.id]=r;return r;});
     richiesteInitialLoaded=true;
-    caricaUtenti(RICHIESTE.map(function(r){return r.utente;}));
     rerenderIfActive(['richieste','catalogo']);
   },function(err){console.error('richieste',err);}));
 
@@ -1513,7 +1510,6 @@ function attachSessionListeners(){
     function mergePren(){
       var merged={};Object.assign(merged,cacheAcq,cacheVen);
       PRENOTAZIONI=Object.values(merged);
-      caricaUtenti(PRENOTAZIONI.reduce(function(a,p){a.push(p.acquirente,p.venditore);return a;},[]));
       rerenderIfActive(['miei-annunci','prenotazioni','pren-ricevute','profilo']);
     }
     boundUnsubs.push(colPrenotazioni.where('acquirente','==',currentUser.uid).onSnapshot(function(snap){
@@ -1550,11 +1546,9 @@ function attachSessionListeners(){
   }
 }
 function detachSessionListeners(){
-  UTENTI_BY_UID[currentUser.uid]=currentUser;
   boundUnsubs.forEach(function(u){try{u();}catch(e){}});
-  boundUnsubs=[];LIBRI=[];UTENTI_BY_UID={};PRENOTAZIONI=[];SEGNALAZIONI=[];RICHIESTE=[];utentiPromise={};
+  boundUnsubs=[];LIBRI=[];UTENTI_BY_UID={};PRENOTAZIONI=[];SEGNALAZIONI=[];RICHIESTE=[];
 }
-  
 function rerenderIfActive(viewNames){
   var v=activeViewName();
   if(viewNames.indexOf(v)!==-1)renderView(v);
