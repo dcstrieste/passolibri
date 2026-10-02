@@ -992,12 +992,12 @@ function libroTesto(id){return LIBRITESTO.filter(function(l){return l.id===id;})
 function libro(id){return LIBRI.filter(function(b){return b.id===id;})[0];}
 function prenotazioneDiLibro(bookId){var list=PRENOTAZIONI.filter(function(p){return p.libroId===bookId && p.stato!=='annullato';});return list[list.length-1];}
 function notificaNuovaPrenotazione(p){
-  // Solo popup + pallino: l'email è già inviata in modo affidabile da openPrenotaModal
-  // (triggerata da chi prenota, non da questo listener che dipende dal venditore online).
-  var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
-  var titolo=lt?lt.titolo:'un tuo libro';
-  toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
-  setNotifDot('notif-dot-item');
+  caricaUtenti([p.acquirente]).then(function(){
+    var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
+    var titolo=lt?lt.titolo:'un tuo libro';
+    toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
+    setNotifDot('notif-dot-item');
+  });
 }
 function setNotifDot(id){var el=$('#'+id);if(el)el.hidden=false;updateNotifToggle();}
 function clearNotifDot(id){var el=$('#'+id);if(el)el.hidden=true;updateNotifToggle();}
@@ -1117,6 +1117,24 @@ function pulisciNotificaAcquirente(){clearNotifDot('notif-dot-acquirente');}
 function pulisciNotificaRichieste(){clearNotifDot('notif-dot-richieste');}
 function utenteNomeByUid(uid){var u=UTENTI_BY_UID[uid];return u?(u.nome+' '+u.cognome):'—';}
 function utenteNomeSoloByUid(uid){var u=UTENTI_BY_UID[uid];return u&&u.nome?u.nome:'—';}
+  var utentiPromise={}; // uid -> promessa di caricamento (evita letture doppie)
+function caricaUtenti(uids){
+  if(currentUser && currentUser.ruolo==='admin')return Promise.resolve(); // l'admin li ha già tutti
+  var nuovi=0;
+  var promesse=uids.filter(function(u,i){return u && uids.indexOf(u)===i;}).map(function(u){
+    if(UTENTI_BY_UID[u])return Promise.resolve();
+    if(!utentiPromise[u]){
+      nuovi++;
+      utentiPromise[u]=colUtenti.doc(u).get().then(function(s){
+        if(s.exists)UTENTI_BY_UID[u]=Object.assign({uid:u},s.data());
+      }).catch(function(err){delete utentiPromise[u];console.error('utente',err);});
+    }
+    return utentiPromise[u];
+  });
+  return Promise.all(promesse).then(function(){
+    if(nuovi)rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','richieste','profilo']);
+  });
+}
 
 function toast(msg,type){
   var stack=$('#toast-stack');var el=document.createElement('div');
@@ -1430,15 +1448,17 @@ function attachSessionListeners(){
     }
     LIBRI=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     libriInitialLoaded=true;
+    caricaUtenti(LIBRI.map(function(b){return b.venditore;}));
     rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','admin','profilo','richieste']);
   },function(err){console.error('libri',err);}));
 
+ if(currentUser.ruolo==='admin'){
   boundUnsubs.push(colUtenti.onSnapshot(function(snap){
     UTENTI_BY_UID={};
     snap.docs.forEach(function(d){UTENTI_BY_UID[d.id]=Object.assign({uid:d.id},d.data());});
     rerenderIfActive(['catalogo','dettaglio','miei-annunci','prenotazioni','pren-ricevute','admin','richieste']);
   },function(err){console.error('utenti',err);}));
-
+}
   var richiesteInitialLoaded=false;
   var richiestePrevById={};
   boundUnsubs.push(colRichieste.onSnapshot(function(snap){
@@ -1461,6 +1481,7 @@ function attachSessionListeners(){
     richiestePrevById={};
     RICHIESTE=snap.docs.map(function(d){var r=Object.assign({id:d.id},d.data());richiestePrevById[r.id]=r;return r;});
     richiesteInitialLoaded=true;
+    caricaUtenti(RICHIESTE.map(function(r){return r.utente;}));
     rerenderIfActive(['richieste','catalogo']);
   },function(err){console.error('richieste',err);}));
 
@@ -1491,6 +1512,7 @@ function attachSessionListeners(){
     function mergePren(){
       var merged={};Object.assign(merged,cacheAcq,cacheVen);
       PRENOTAZIONI=Object.values(merged);
+      caricaUtenti(PRENOTAZIONI.reduce(function(a,p){a.push(p.acquirente,p.venditore);return a;},[]));
       rerenderIfActive(['miei-annunci','prenotazioni','pren-ricevute','profilo']);
     }
     boundUnsubs.push(colPrenotazioni.where('acquirente','==',currentUser.uid).onSnapshot(function(snap){
@@ -1527,9 +1549,11 @@ function attachSessionListeners(){
   }
 }
 function detachSessionListeners(){
+  UTENTI_BY_UID[currentUser.uid]=currentUser;
   boundUnsubs.forEach(function(u){try{u();}catch(e){}});
-  boundUnsubs=[];LIBRI=[];UTENTI_BY_UID={};PRENOTAZIONI=[];SEGNALAZIONI=[];RICHIESTE=[];
+  boundUnsubs=[];LIBRI=[];UTENTI_BY_UID={};PRENOTAZIONI=[];SEGNALAZIONI=[];RICHIESTE=[];utentiPromise={};
 }
+  
 function rerenderIfActive(viewNames){
   var v=activeViewName();
   if(viewNames.indexOf(v)!==-1)renderView(v);
