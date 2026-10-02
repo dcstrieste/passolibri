@@ -2029,24 +2029,31 @@ function eseguiAnnullaPrenotazione(id,motivo,dettaglio){
   if(!p)return Promise.reject(new Error('Prenotazione non trovata.'));
   var hoursLeft=(new Date(p.data+'T'+p.ora).getTime()-Date.now())/3600000;
   if(hoursLeft<24 && hoursLeft>0){toast('Attenzione: stai annullando con meno di 24 ore di preavviso, come previsto dal regolamento.','warn');}
-  return colPrenotazioni.doc(p.id).update({stato:'annullato',motivoAnnullamento:motivo,motivoAnnullamentoDettaglio:dettaglio||null,annullatoIl:FieldValue.serverTimestamp()})
-    .then(function(){return colLibri.doc(p.libroId).update({stato:'disponibile'});})
-    .then(function(){
-      toast('Prenotazione annullata. Il libro è di nuovo disponibile.','brand');
-      // Email inviata subito da chi annulla (sempre online in questo momento): arriva
-      // alla controparte anche se non ha il sito aperto in quel momento.
-      var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
-      var titolo=lt?lt.titolo:'un libro';
-      if(currentUser.uid===p.acquirente){
-        var venditore=UTENTI_BY_UID[p.venditore];
-        if(venditore&&venditore.email)inviaEmail(venditore.email,'Prenotazione annullata — Mercatino Libri',
-          '<p>La prenotazione per «'+esc(titolo)+'» è stata annullata'+(p.acquirente?' da '+esc(utenteNomeSoloByUid(p.acquirente)):'')+'.</p><p>Il libro è di nuovo disponibile e visibile nel catalogo.</p>');
-      }else{
-        var acquirente=UTENTI_BY_UID[p.acquirente];
-        if(acquirente&&acquirente.email)inviaEmail(acquirente.email,'Prenotazione annullata — Mercatino Libri',
-          '<p>Il venditore ha annullato la prenotazione per «'+esc(titolo)+'».</p>');
-      }
-    });
+
+  var batch=db.batch();
+  batch.update(colPrenotazioni.doc(p.id),{
+    stato:'annullato',
+    motivoAnnullamento:motivo,
+    motivoAnnullamentoDettaglio:dettaglio||null,
+    annullatoIl:FieldValue.serverTimestamp()
+  });
+  batch.update(colLibri.doc(p.libroId),{
+    stato:'disponibile',
+    prenotatoDa:FieldValue.delete()
+  });
+
+  return batch.commit().then(function(){
+    toast('Prenotazione annullata. Il libro è di nuovo disponibile.','brand');
+    var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
+    var titolo=lt?lt.titolo:'un libro';
+    if(currentUser.uid===p.acquirente){
+      var venditore=UTENTI_BY_UID[p.venditore];
+      if(venditore&&venditore.email)inviaEmail(venditore.email,'prenotazione_annullata',{titolo:titolo});
+    }else{
+      var acquirente=UTENTI_BY_UID[p.acquirente];
+      if(acquirente&&acquirente.email)inviaEmail(acquirente.email,'prenotazione_annullata',{titolo:titolo});
+    }
+  });
 }
 function eseguiAnnullaVendita(id,motivo,dettaglio){
   var pren=prenotazioneDiLibro(id);
