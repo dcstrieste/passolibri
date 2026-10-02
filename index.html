@@ -1137,6 +1137,7 @@ function caricaUtenti(uids){
 }
 
 function toast(msg,type){
+  if(String(msg).indexOf('Errore')===0)console.trace('TOAST ERRORE:',msg);
   var stack=$('#toast-stack');var el=document.createElement('div');
   el.className='toast'+(type?' '+type:'');el.textContent=msg;stack.appendChild(el);
   setTimeout(function(){el.classList.add('out');setTimeout(function(){el.remove();},300);},3800);
