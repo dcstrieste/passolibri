@@ -270,7 +270,6 @@ tbody tr:hover{background:rgba(255,147,2,.05)}
 .neg-box .neg-title{font-size:.78rem;font-weight:700;color:var(--arancio-scuro);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
 .neg-slot{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;padding:.4rem 0;border-top:1px dashed var(--grigio-300);font-size:.88rem;font-weight:600}
 .neg-slot:first-of-type{border-top:0}
-.neg-msg{font-size:.85rem;font-style:italic;margin:.3rem 0 .5rem}
 .slot-add-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .slot-add-row .input{flex:1;min-width:120px}
 .res-card{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);padding:1rem 1.1rem;margin-bottom:.8rem}
@@ -1017,7 +1016,6 @@ function negoziazioneHTML(p){
   var io=ruoloInPren(p),daMe=(n.da===io);
   var altro=(n.da==='acquirente')?utenteNomeSoloByUid(p.acquirente):utenteNomeSoloByUid(p.venditore);
   var h='<div class="neg-box"><div class="neg-title">'+(daMe?'Hai proposto queste date':esc(altro)+' propone queste date')+'</div>';
-  if(n.messaggio)h+='<p class="neg-msg">«'+esc(n.messaggio)+'»</p>';
   n.proposte.forEach(function(sl,i){
     h+='<div class="neg-slot"><span>'+esc(slotLabel(sl))+'</span>'+(daMe?'':'<button class="icon-btn ok" data-act="accetta-slot" data-id="'+p.id+'" data-i="'+i+'">Accetta</button>')+'</div>';
   });
@@ -1893,7 +1891,7 @@ function openPrenotaModal(b){
       titolo:'Richiedi altre date',
       intro:'Indica una o più date e orari in cui saresti disponibile: il venditore potrà accettarne una oppure risponderti con altre date. Il libro resterà riservato per te nel frattempo.',
       conferma:'Invia richiesta',
-      onSubmit:function(slots,msg){
+      onSubmit:function(slots){
         var libroRef=colLibri.doc(b.id),prenRef=colPrenotazioni.doc();
         return db.runTransaction(function(tx){
           return tx.get(libroRef).then(function(snap){
@@ -1901,7 +1899,7 @@ function openPrenotaModal(b){
             tx.set(prenRef,{
               libroId:b.id,acquirente:currentUser.uid,venditore:b.venditore,sede:b.sede,luogo:b.luogo,data:slots[0].data,ora:slots[0].ora,
               stato:'richiesta',appuntamentoConfermato:false,confermaVenditore:false,
-              negoziazione:{da:'acquirente',proposte:slots,messaggio:msg||'',aggiornatoIl:Date.now()},
+              negoziazione:{da:'acquirente',proposte:slots,aggiornatoIl:Date.now()},
               createdAt:FieldValue.serverTimestamp()
             });
             tx.update(libroRef,{stato:'prenotato',prenotatoDa:currentUser.uid});
@@ -1927,7 +1925,6 @@ function openProponiDateModal(o){
     '<p class="small muted" style="margin-bottom:1rem">'+esc(o.intro)+'</p>'+
     '<div class="field"><label>Data e ora <span class="req">*</span></label><div class="slot-add-row"><input class="input" id="nd-data" type="date" /><input class="input" id="nd-ora" type="time" step="900" /><button type="button" class="btn btn-outline btn-sm" id="nd-add">Aggiungi</button></div>'+
     '<div class="tag-list" id="nd-list" style="margin-top:.6rem"></div><p class="field-hint">Aggiungi almeno una proposta (meglio 2-3). Usa orari compatibili con l\'orario scolastico.</p></div>'+
-    '<div class="field"><label for="nd-msg">Messaggio (facoltativo)</label><textarea class="textarea" id="nd-msg" rows="2" maxlength="200" placeholder="Es. Il lunedì ho gli allenamenti, posso solo in ricreazione"></textarea></div>'+
     '<button type="button" class="btn btn-primary btn-block" id="nd-send">'+esc(o.conferma)+'</button>';
   $('#nd-data').min=oggiISO();
   function draw(){
@@ -1946,7 +1943,7 @@ function openProponiDateModal(o){
   $('#nd-send').addEventListener('click',function(){
     if(!slots.length){toast('Aggiungi almeno una data e ora.','warn');return;}
     var bt=$('#nd-send');bt.disabled=true;
-    Promise.resolve(o.onSubmit(slots.slice(),$('#nd-msg').value.trim())).then(function(){closeModal('modal-date');}).catch(function(err){bt.disabled=false;toast('Errore: '+err.message,'warn');});
+    Promise.resolve(o.onSubmit(slots.slice())).then(function(){closeModal('modal-date');}).catch(function(err){bt.disabled=false;toast('Errore: '+err.message,'warn');});
   });
   openModal('modal-date');
 }
@@ -1968,8 +1965,8 @@ function controproponiPren(id){
     titolo:'Proponi altre date',
     intro:'Indica le date e gli orari in cui sei disponibile: l\'altra parte potrà accettarne una oppure risponderti ancora.',
     conferma:'Invia proposta',
-    onSubmit:function(slots,msg){
-      return colPrenotazioni.doc(id).update({stato:'richiesta',negoziazione:{da:ruoloInPren(p),proposte:slots,messaggio:msg||'',aggiornatoIl:Date.now()}}).then(function(){
+    onSubmit:function(slots){
+      return colPrenotazioni.doc(id).update({stato:'richiesta',negoziazione:{da:ruoloInPren(p),proposte:slots,aggiornatoIl:Date.now()}}).then(function(){
         toast('Proposta inviata.','success');
         var altro=UTENTI_BY_UID[(ruoloInPren(p)==='acquirente')?p.venditore:p.acquirente];
         if(altro&&altro.email)inviaEmail(altro.email,'Nuove date proposte — Mercatino Libri','<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ti ha proposto nuove date per «'+esc(titoloPren(p))+'».</p><p>Accedi al sito, sezione «Prenotazioni», per accettarne una o rispondere.</p>');
