@@ -180,6 +180,7 @@ section{padding-block:clamp(2rem,5vw,3.2rem)}
 .badge.confermato{background:rgba(0,155,224,.16);color:var(--ciano-scuro)}
 .badge.completato,.badge.venduto,.badge.scambiocompletato{background:var(--grigio-200);color:var(--ink-soft)}
 .badge.annullato,.badge.disattivato{background:transparent;border:1.5px dashed var(--grigio-500);color:var(--grigio-500)}
+.badge.richiesta{background:rgba(255,147,2,.18);color:var(--arancio-scuro)}
 .badge.aperta{background:rgba(255,147,2,.18);color:var(--arancio-scuro)}
 .badge.in_lavorazione{background:rgba(0,155,224,.16);color:var(--ciano-scuro)}
 .badge.risolta{background:rgba(108,189,1,.18);color:var(--verde-scuro)}
@@ -265,6 +266,13 @@ tbody tr:hover{background:rgba(255,147,2,.05)}
 .stat-card span{font-size:.74rem;color:var(--ink-soft)}
 
 /* booking / reservation cards */
+.neg-box{margin-top:.7rem;padding:.8rem .9rem;border-radius:var(--r-s);background:rgba(255,147,2,.08);border:1px solid rgba(255,147,2,.4)}
+.neg-box .neg-title{font-size:.78rem;font-weight:700;color:var(--arancio-scuro);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem}
+.neg-slot{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;padding:.4rem 0;border-top:1px dashed var(--grigio-300);font-size:.88rem;font-weight:600}
+.neg-slot:first-of-type{border-top:0}
+.neg-msg{font-size:.85rem;font-style:italic;margin:.3rem 0 .5rem}
+.slot-add-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.slot-add-row .input{flex:1;min-width:120px}
 .res-card{background:#fff;border:1px solid var(--grigio-200);border-radius:var(--r-m);padding:1rem 1.1rem;margin-bottom:.8rem}
 .res-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap;margin-bottom:.6rem}
 .res-meta{font-size:.82rem;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:.3rem 1rem;margin:.4rem 0}
@@ -804,6 +812,16 @@ footer{background:var(--ink);color:var(--carta);margin-top:2.4rem;padding-bottom
   </div>
 </div>
 
+<!-- MODAL: PROPONI DATE (richiesta altre date / controproposta) -->
+<div class="modal-backdrop" id="modal-date">
+  <div class="modal">
+    <div class="modal-head info"><div><span class="eyebrow" style="color:var(--ciano-scuro)">Date alternative</span><h3 class="h-card" style="margin-top:.3rem" id="modal-date-title">Proponi altre date</h3></div>
+      <button class="modal-close" data-close="modal-date" aria-label="Chiudi"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body" id="modal-date-body"></div>
+  </div>
+</div>
+
 <!-- MODAL: RICEVUTA -->
 <div class="modal-backdrop" id="modal-ricevuta">
   <div class="modal">
@@ -932,7 +950,7 @@ var colRichieste = db.collection('richieste');
 
 var CATEGORIE_SEGNALAZIONE = ['Annunci','ISBN','Contenuti','Prenotazioni','Account','Problemi tecnici'];
 var STATO_LIBRO_LABEL = {disponibile:'Disponibile',prenotato:'Prenotato',venduto:'Venduto',disattivato:'Disattivato'};
-var STATO_PREN_LABEL = {prenotato:'In attesa di conferma',confermato:'Appuntamento confermato',completato:'Scambio completato',annullato:'Annullata'};
+var STATO_PREN_LABEL = {richiesta:'Date da concordare',prenotato:'In attesa di conferma',confermato:'Appuntamento confermato',completato:'Scambio completato',annullato:'Annullata'};
 var STATO_RICHIESTA_LABEL = {aperta:'In attesa',soddisfatta:'Trovato!'};
 var COND_CLASS={Ottima:'ot',Buona:'bu',Discreta:'di',Usurata:'di'};
 var PALETTE=['#FF9302','#009BE0','#6CBD01','#8E2595'];
@@ -990,13 +1008,31 @@ function colorForMateria(materia){
 }
 function libroTesto(id){return LIBRITESTO.filter(function(l){return l.id===id;})[0];}
 function libro(id){return LIBRI.filter(function(b){return b.id===id;})[0];}
+function ruoloInPren(p){return (currentUser && p.acquirente===currentUser.uid)?'acquirente':'venditore';}
+function dataOraPren(p){return p.stato==='richiesta'?'Data da concordare':fmtDate(p.data)+' · '+p.ora;}
+function slotLabel(sl){return fmtDate(sl.data)+' · '+sl.ora;}
+function negoziazioneHTML(p){
+  var n=p.negoziazione;
+  if(p.stato!=='richiesta' || !n || !n.proposte || !n.proposte.length)return '';
+  var io=ruoloInPren(p),daMe=(n.da===io);
+  var altro=(n.da==='acquirente')?utenteNomeSoloByUid(p.acquirente):utenteNomeSoloByUid(p.venditore);
+  var h='<div class="neg-box"><div class="neg-title">'+(daMe?'Hai proposto queste date':esc(altro)+' propone queste date')+'</div>';
+  if(n.messaggio)h+='<p class="neg-msg">«'+esc(n.messaggio)+'»</p>';
+  n.proposte.forEach(function(sl,i){
+    h+='<div class="neg-slot"><span>'+esc(slotLabel(sl))+'</span>'+(daMe?'':'<button class="icon-btn ok" data-act="accetta-slot" data-id="'+p.id+'" data-i="'+i+'">Accetta</button>')+'</div>';
+  });
+  if(daMe)h+='<p class="small muted" style="margin-top:.5rem">In attesa di risposta dell\'altra parte. Puoi anche annullare la prenotazione.</p>';
+  else h+='<div class="row-actions" style="margin-top:.5rem"><button class="icon-btn" data-act="controproponi" data-id="'+p.id+'">Proponi altre date</button></div>';
+  return h+'</div>';
+}
 function prenotazioneDiLibro(bookId){var list=PRENOTAZIONI.filter(function(p){return p.libroId===bookId && p.stato!=='annullato';});return list[list.length-1];}
 function notificaNuovaPrenotazione(p){
   // Solo popup + pallino: l'email è già inviata in modo affidabile da openPrenotaModal
   // (triggerata da chi prenota, non da questo listener che dipende dal venditore online).
   var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
   var titolo=lt?lt.titolo:'un tuo libro';
-  toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
+  if(p.stato==='richiesta')toast('📅 '+esc(utenteNomeByUid(p.acquirente))+' ti ha chiesto altre date per «'+esc(titolo)+'».','success');
+  else toast('📚 '+esc(utenteNomeByUid(p.acquirente))+' ha prenotato «'+esc(titolo)+'»!','success');
   setNotifDot('notif-dot-item');
 }
 function setNotifDot(id){var el=$('#'+id);if(el)el.hidden=false;updateNotifToggle();}
@@ -1077,7 +1113,7 @@ function notificaPrenotazioneChange(ch,opts){
   var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;
   var titolo=lt?lt.titolo:'un libro';
   if(ch.type==='added'){
-    if(opts.notifyAdded)toast('📥 Nuova prenotazione: «'+esc(titolo)+'» da '+esc(utenteNomeByUid(p.acquirente))+'.','success');
+    if(opts.notifyAdded)toast((p.stato==='richiesta'?'📅 Richiesta di altre date: «':'📥 Nuova prenotazione: «')+esc(titolo)+'» da '+esc(utenteNomeByUid(p.acquirente))+'.','success');
   }else if(ch.type==='removed'){
     toast('🗑️ Prenotazione rimossa dallo storico: «'+esc(titolo)+'».','brand');
     if(opts.dotId)setNotifDot(opts.dotId);
@@ -1087,6 +1123,11 @@ function notificaPrenotazioneChange(ch,opts){
     // eseguiAnnullaVendita, eseguiAnnullaAnnuncio, conferma-appuntamento, completa-venditore),
     // così arrivano anche se la controparte non ha il sito aperto in quel momento.
     var prev=opts.getPrev?opts.getPrev(p.id):null;
+    // Nuova proposta di date (richiesta iniziale o controproposta della controparte)
+    if(prev && p.stato==='richiesta' && p.negoziazione && (!prev.negoziazione || prev.negoziazione.aggiornatoIl!==p.negoziazione.aggiornatoIl) && currentUser && p.negoziazione.da!==ruoloInPren(p)){
+      toast('📅 Nuove date proposte per «'+esc(titolo)+'»: controlla la prenotazione.','success');
+      if(opts.dotId)setNotifDot(opts.dotId);
+    }
     if(prev && prev.stato!==p.stato){
       if(p.stato==='confermato')toast('✅ Appuntamento confermato per «'+esc(titolo)+'».','success');
       else if(p.stato==='completato')toast('🤝 Scambio completato: «'+esc(titolo)+'».','success');
@@ -1208,6 +1249,8 @@ var MASCOTTE_FAQ=[
    a:'<p>Per vendere un libro vai su <strong>Annunci → Inserisci annuncio</strong>: scegli il testo dal catalogo scolastico, indica condizione, prezzo e le date/orari in cui sei disponibile per lo scambio.</p><p>Il tuo annuncio comparirà subito nel catalogo pubblico, con il tuo nome (senza cognome) visibile agli altri studenti.</p>'},
   {kw:['prenotare','prenoto','prenotazione','come compro','comprare','acquistare'],
    a:'<p>Apri la scheda del libro che ti interessa e clicca su <strong>Prenota</strong>: scegli data e ora tra quelle proposte dal venditore per incontrarvi a scuola.</p><p>Trovi tutte le tue prenotazioni in <strong>Prenotazioni → Le mie prenotazioni</strong>.</p>'},
+  {kw:['altre date','altra data','date diverse','data non va bene','non posso in quelle date','proporre date','cambiare data'],
+   a:'<p>Se nessuna data del venditore ti va bene, nella finestra <strong>Prenota</strong> clicca <strong>Richiedi altre date</strong> e indica le tue disponibilità. Il venditore potrà <strong>accettarne una</strong> oppure <strong>proporne altre</strong> da Prenotazioni ricevute; tu potrai accettare o rispondere ancora da Le mie prenotazioni.</p>'},
   {kw:['annullare annuncio','annullare la vendita','cancellare annuncio','ritirare annuncio'],
    a:'<p>Da <strong>Annunci → I miei annunci</strong> puoi cliccare su <strong>Annulla annuncio</strong> e indicare il motivo. L\'annuncio viene disattivato e tolto dal catalogo pubblico.</p>'},
   {kw:['annullare prenotazione','cancellare prenotazione','disdire','disdetta'],
@@ -1810,7 +1853,8 @@ function openPrenotaModal(b){
     '</div></div><div class="field"><label>Ora <span class="req">*</span></label><div class="tag-list" style="gap:.5rem">'+
     b.orari.map(function(o){return '<label class="pay-opt" style="display:inline-flex"><input type="radio" name="pn-ora" value="'+esc(o)+'"> '+o+'</label>';}).join('')+
     '</div></div><p class="field-hint">Il luogo dell\'incontro è quello proposto dal venditore. Il pagamento avviene sempre di persona.</p>'+
-    '<button type="submit" class="btn btn-primary btn-block" style="margin-top:.6rem">Conferma prenotazione</button></form>';
+    '<button type="submit" class="btn btn-primary btn-block" style="margin-top:.6rem">Conferma prenotazione</button>'+
+    '<div style="text-align:center;margin-top:.9rem;padding-top:.9rem;border-top:1px dashed var(--grigio-300)"><p class="small muted" style="margin-bottom:.5rem">Nessuna di queste date ti va bene?</p><button type="button" class="btn btn-outline btn-sm" id="btn-richiedi-date">Richiedi altre date</button></div></form>';
   $('#modal-prenota-body').innerHTML=html;
   $('#prenota-form').addEventListener('submit',function(e){
     e.preventDefault();
@@ -1843,7 +1887,95 @@ function openPrenotaModal(b){
         '<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ha prenotato «'+esc(lt.titolo)+'».</p><p>Vai su «Prenotazioni ricevute» sul sito per confermare l\'appuntamento.</p>');
     }).catch(function(err){submitBtn.disabled=false;toast('Errore: '+err.message,'warn');});
   });
+  $('#btn-richiedi-date').addEventListener('click',function(){
+    closeModal('modal-prenota');
+    openProponiDateModal({
+      titolo:'Richiedi altre date',
+      intro:'Indica una o più date e orari in cui saresti disponibile: il venditore potrà accettarne una oppure risponderti con altre date. Il libro resterà riservato per te nel frattempo.',
+      conferma:'Invia richiesta',
+      onSubmit:function(slots,msg){
+        var libroRef=colLibri.doc(b.id),prenRef=colPrenotazioni.doc();
+        return db.runTransaction(function(tx){
+          return tx.get(libroRef).then(function(snap){
+            if(!snap.exists || snap.data().stato!=='disponibile')throw new Error('Questo libro non è più disponibile: qualcun altro potrebbe averlo appena prenotato.');
+            tx.set(prenRef,{
+              libroId:b.id,acquirente:currentUser.uid,venditore:b.venditore,sede:b.sede,luogo:b.luogo,data:slots[0].data,ora:slots[0].ora,
+              stato:'richiesta',appuntamentoConfermato:false,confermaVenditore:false,
+              negoziazione:{da:'acquirente',proposte:slots,messaggio:msg||'',aggiornatoIl:Date.now()},
+              createdAt:FieldValue.serverTimestamp()
+            });
+            tx.update(libroRef,{stato:'prenotato',prenotatoDa:currentUser.uid});
+          });
+        }).then(function(){
+          toast('Richiesta inviata! Il venditore potrà accettare una delle tue date o proporne altre.','success');
+          showView('prenotazioni');
+          var venditore=UTENTI_BY_UID[b.venditore];
+          if(venditore&&venditore.email)inviaEmail(venditore.email,'Richiesta di altre date sul Mercatino Libri',
+            '<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ha prenotato «'+esc(lt.titolo)+'» ma ti chiede altre date.</p><p>Vai su «Prenotazioni ricevute» per accettarne una o proporne di diverse.</p>');
+        });
+      }
+    });
+  });
   openModal('modal-prenota');
+}
+
+/* ---- Modal generico per proporre date/orari (richiesta e controproposta) ---- */
+function openProponiDateModal(o){
+  var slots=[];
+  $('#modal-date-title').textContent=o.titolo;
+  $('#modal-date-body').innerHTML=
+    '<p class="small muted" style="margin-bottom:1rem">'+esc(o.intro)+'</p>'+
+    '<div class="field"><label>Data e ora <span class="req">*</span></label><div class="slot-add-row"><input class="input" id="nd-data" type="date" /><input class="input" id="nd-ora" type="time" step="900" /><button type="button" class="btn btn-outline btn-sm" id="nd-add">Aggiungi</button></div>'+
+    '<div class="tag-list" id="nd-list" style="margin-top:.6rem"></div><p class="field-hint">Aggiungi almeno una proposta (meglio 2-3). Usa orari compatibili con l\'orario scolastico.</p></div>'+
+    '<div class="field"><label for="nd-msg">Messaggio (facoltativo)</label><textarea class="textarea" id="nd-msg" rows="2" maxlength="200" placeholder="Es. Il lunedì ho gli allenamenti, posso solo in ricreazione"></textarea></div>'+
+    '<button type="button" class="btn btn-primary btn-block" id="nd-send">'+esc(o.conferma)+'</button>';
+  $('#nd-data').min=oggiISO();
+  function draw(){
+    $('#nd-list').innerHTML=slots.map(function(sl,i){return '<span class="tag">'+esc(slotLabel(sl))+'<button type="button" data-i="'+i+'">×</button></span>';}).join('');
+    $$('#nd-list button').forEach(function(bt){bt.addEventListener('click',function(){slots.splice(+bt.dataset.i,1);draw();});});
+  }
+  $('#nd-add').addEventListener('click',function(){
+    var d=$('#nd-data').value,t=$('#nd-ora').value;
+    if(!d||!t){toast('Scegli sia la data sia l\'ora.','warn');return;}
+    if(d<oggiISO()){toast('Scegli una data da oggi in poi.','warn');return;}
+    if(slots.some(function(x){return x.data===d&&x.ora===t;})){toast('Proposta già aggiunta.','warn');return;}
+    if(slots.length>=6){toast('Puoi proporre al massimo 6 date.','warn');return;}
+    slots.push({data:d,ora:t});slots.sort(function(a,b){return (a.data+a.ora)<(b.data+b.ora)?-1:1;});
+    $('#nd-data').value='';$('#nd-ora').value='';draw();
+  });
+  $('#nd-send').addEventListener('click',function(){
+    if(!slots.length){toast('Aggiungi almeno una data e ora.','warn');return;}
+    var bt=$('#nd-send');bt.disabled=true;
+    Promise.resolve(o.onSubmit(slots.slice(),$('#nd-msg').value.trim())).then(function(){closeModal('modal-date');}).catch(function(err){bt.disabled=false;toast('Errore: '+err.message,'warn');});
+  });
+  openModal('modal-date');
+}
+function prenDaId(id){return PRENOTAZIONI.filter(function(x){return x.id===id;})[0];}
+function titoloPren(p){var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null;return lt?lt.titolo:'un libro';}
+function accettaSlotPren(id,i){
+  var p=prenDaId(id);
+  if(!p||!p.negoziazione||!p.negoziazione.proposte[i])return Promise.reject(new Error('Proposta non trovata.'));
+  var sl=p.negoziazione.proposte[i];
+  return colPrenotazioni.doc(id).update({data:sl.data,ora:sl.ora,stato:'confermato',appuntamentoConfermato:true,negoziazione:FieldValue.delete()}).then(function(){
+    toast('Data accettata: appuntamento confermato per '+slotLabel(sl)+'.','success');
+    var altro=UTENTI_BY_UID[(ruoloInPren(p)==='acquirente')?p.venditore:p.acquirente];
+    if(altro&&altro.email)inviaEmail(altro.email,'Appuntamento confermato — Mercatino Libri','<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ha accettato la data proposta per «'+esc(titoloPren(p))+'»: <strong>'+esc(slotLabel(sl))+'</strong>.</p>');
+  });
+}
+function controproponiPren(id){
+  var p=prenDaId(id);if(!p)return;
+  openProponiDateModal({
+    titolo:'Proponi altre date',
+    intro:'Indica le date e gli orari in cui sei disponibile: l\'altra parte potrà accettarne una oppure risponderti ancora.',
+    conferma:'Invia proposta',
+    onSubmit:function(slots,msg){
+      return colPrenotazioni.doc(id).update({stato:'richiesta',negoziazione:{da:ruoloInPren(p),proposte:slots,messaggio:msg||'',aggiornatoIl:Date.now()}}).then(function(){
+        toast('Proposta inviata.','success');
+        var altro=UTENTI_BY_UID[(ruoloInPren(p)==='acquirente')?p.venditore:p.acquirente];
+        if(altro&&altro.email)inviaEmail(altro.email,'Nuove date proposte — Mercatino Libri','<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ti ha proposto nuove date per «'+esc(titoloPren(p))+'».</p><p>Accedi al sito, sezione «Prenotazioni», per accettarne una o rispondere.</p>');
+      });
+    }
+  });
 }
 
 /* ============================================================
@@ -1950,7 +2082,8 @@ function renderMieiAnnunci(){
     if(b.stato==='disponibile'){
       actions='<button class="icon-btn ok" data-act="venduto" data-id="'+b.id+'">Segna come venduto</button><button class="icon-btn danger" data-act="annulla" data-id="'+b.id+'">Annulla annuncio</button>';
     }else if(b.stato==='prenotato' && pren){
-      if(!pren.appuntamentoConfermato){actions='<button class="icon-btn ok" data-act="conferma-appuntamento" data-id="'+pren.id+'">Conferma appuntamento</button>';}
+      if(pren.stato==='richiesta'){actions='';}
+      else if(!pren.appuntamentoConfermato){actions='<button class="icon-btn ok" data-act="conferma-appuntamento" data-id="'+pren.id+'">Conferma appuntamento</button>';}
       else{actions='<button class="icon-btn ok" data-act="completa-venditore" data-id="'+pren.id+'">Segnala scambio avvenuto</button>';}
       actions+=' <button class="icon-btn danger" data-act="annulla" data-id="'+b.id+'">Annulla annuncio</button>';
     }else if(b.stato==='venduto'){
@@ -1960,7 +2093,7 @@ function renderMieiAnnunci(){
     }
     return '<div class="res-card"><div class="res-head"><div>'+(eliminabile?'<input type="checkbox" class="sel-check" data-id="'+b.id+'">':'')+'<strong>'+esc(lt.titolo)+'</strong><div class="small muted">'+esc(lt.materia)+' · '+esc(lt.classe)+'</div></div><span class="badge '+b.stato+'">'+esc(STATO_LIBRO_LABEL[b.stato])+'</span></div>'+
       '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(b)+'</span></div>'+
-      (pren?'<div class="res-meta"><span>Prenotato da '+esc(utenteNomeByUid(pren.acquirente))+'</span><span>'+fmtDate(pren.data)+' · '+pren.ora+'</span></div>'+confirmTrackHTML(pren):'')+
+      (pren?'<div class="res-meta"><span>Prenotato da '+esc(utenteNomeByUid(pren.acquirente))+'</span><span>'+dataOraPren(pren)+'</span></div>'+confirmTrackHTML(pren)+negoziazioneHTML(pren):'')+
       (b.stato==='disattivato' && b.motivoAnnullamento?'<p class="small muted" style="margin-top:.4rem">Motivo annullamento: '+esc(b.motivoAnnullamento)+(b.motivoAnnullamentoDettaglio?' — '+esc(b.motivoAnnullamentoDettaglio):'')+'</p>':'')+
       '<div class="row-actions" style="margin-top:.6rem">'+actions+' <button class="icon-btn" data-act="ricevuta" data-id="'+b.id+'">Ricevuta</button></div></div>';
   }).join('');
@@ -2087,6 +2220,8 @@ function mieiAnnunciClick(e){
   if(act==='annulla'){openAnnullaModal('annuncio',id);btn.disabled=false;return;}
   if(act==='annulla-vendita'){openAnnullaModal('vendita',id);btn.disabled=false;return;}
   if(act==='annulla-pren-venditore'){openAnnullaModal('prenotazione-venditore',id);btn.disabled=false;return;}
+  if(act==='controproponi'){btn.disabled=false;controproponiPren(id);return;}
+  if(act==='accetta-slot')task=accettaSlotPren(id,+btn.dataset.i);
   if(act==='ricevuta'){openRicevuta(libro(id));btn.disabled=false;return;}
   if(act==='conferma-appuntamento')task=colPrenotazioni.doc(id).update({appuntamentoConfermato:true,stato:'confermato'}).then(function(){
     toast('Appuntamento confermato.','success');
@@ -2200,13 +2335,13 @@ function renderPrenotazioni(){
     if(!eliminabile){
       var hoursLeft=(new Date(p.data+'T'+p.ora).getTime()-Date.now())/3600000;
       actions+='<button class="icon-btn danger" data-act="annulla-pren" data-id="'+p.id+'">Annulla prenotazione</button>';
-      if(hoursLeft<24 && hoursLeft>0){actions+=' <span class="small" style="color:var(--viola)">meno di 24h dall\'incontro</span>';}
+      if(p.stato!=='richiesta' && hoursLeft<24 && hoursLeft>0){actions+=' <span class="small" style="color:var(--viola)">meno di 24h dall\'incontro</span>';}
     }else{
       actions='<button class="icon-btn" data-act="elimina-pren" data-id="'+p.id+'">Elimina</button>';
     }
     return '<div class="res-card"><div class="res-head"><div>'+(eliminabile?'<input type="checkbox" class="sel-check" data-id="'+p.id+'">':'')+'<strong>'+esc(lt.titolo)+'</strong><div class="small muted">venduto da '+esc(utenteNomeByUid(p.venditore))+'</div></div><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div>'+
-      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(p)+'</span><span>'+fmtDate(p.data)+' · '+p.ora+'</span></div>'+
-      confirmTrackHTML(p)+
+      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(p)+'</span><span>'+dataOraPren(p)+'</span></div>'+
+      confirmTrackHTML(p)+negoziazioneHTML(p)+
       (p.stato==='annullato' && p.motivoAnnullamento?'<p class="small muted" style="margin-top:.4rem">Motivo annullamento: '+esc(p.motivoAnnullamento)+(p.motivoAnnullamentoDettaglio?' — '+esc(p.motivoAnnullamentoDettaglio):'')+'</p>':'')+
       '<div class="row-actions" style="margin-top:.6rem">'+actions+' <button class="icon-btn" data-act="ricevuta" data-id="'+b.id+'">Ricevuta</button></div></div>';
   }).join('');
@@ -2220,6 +2355,8 @@ function prenotazioniClick(e){
   btn.disabled=true;
   var task=Promise.resolve();
   if(act==='annulla-pren'){btn.disabled=false;openAnnullaModal('prenotazione',id);return;}
+  if(act==='controproponi'){btn.disabled=false;controproponiPren(id);return;}
+  if(act==='accetta-slot')task=accettaSlotPren(id,+btn.dataset.i);
   if(act==='ricevuta'){openRicevuta(libro(id));btn.disabled=false;return;}
   if(act==='elimina-pren'){
     btn.disabled=false;
@@ -2274,15 +2411,16 @@ function renderPrenotazioniRicevute(){
     if(!b||!lt)return '';
     var actions='';
     if(p.stato!=='annullato' && p.stato!=='completato'){
-      if(!p.appuntamentoConfermato){actions='<button class="icon-btn ok" data-act="conferma-appuntamento" data-id="'+p.id+'">Conferma appuntamento</button>';}
+      if(p.stato==='richiesta'){actions='';}
+      else if(!p.appuntamentoConfermato){actions='<button class="icon-btn ok" data-act="conferma-appuntamento" data-id="'+p.id+'">Conferma appuntamento</button>';}
       else{actions='<button class="icon-btn ok" data-act="completa-venditore" data-id="'+p.id+'">Segnala scambio avvenuto</button>';}
       actions+=' <button class="icon-btn danger" data-act="annulla-pren-venditore" data-id="'+p.id+'">Annulla prenotazione</button>';
     }else{
       actions='<button class="icon-btn" data-act="elimina-pren" data-id="'+p.id+'">Elimina</button>';
     }
     return '<div class="res-card"><div class="res-head"><div><strong>'+esc(lt.titolo)+'</strong><div class="small muted">prenotato da '+esc(utenteNomeByUid(p.acquirente))+'</div></div><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div>'+
-      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(p)+'</span><span>'+fmtDate(p.data)+' · '+p.ora+'</span></div>'+
-      confirmTrackHTML(p)+
+      '<div class="res-meta"><span class="price">'+fmtPrice(b.prezzo)+'</span><span>'+fmtLuogo(p)+'</span><span>'+dataOraPren(p)+'</span></div>'+
+      confirmTrackHTML(p)+negoziazioneHTML(p)+
       (p.stato==='annullato' && p.motivoAnnullamento?'<p class="small muted" style="margin-top:.4rem">Motivo annullamento: '+esc(p.motivoAnnullamento)+(p.motivoAnnullamentoDettaglio?' — '+esc(p.motivoAnnullamentoDettaglio):'')+'</p>':'')+
       '<div class="row-actions" style="margin-top:.6rem">'+actions+' <button class="icon-btn" data-act="ricevuta" data-id="'+b.id+'">Ricevuta</button></div></div>';
   }).join('');
@@ -2423,7 +2561,7 @@ function renderProfilo(){
   var mine=PRENOTAZIONI.filter(function(p){return p.acquirente===currentUser.uid;}).sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).slice(0,4);
   $('#profilo-prenotazioni').innerHTML = mine.length ? mine.map(function(p){
     var b=libro(p.libroId);var lt=b?libroTesto(b.libroTestoId):null;if(!lt)return '';
-    return '<div class="res-card"><div class="res-head"><strong>'+esc(lt.titolo)+'</strong><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div><p class="small muted">'+fmtDate(p.data)+' · '+p.ora+'</p></div>';
+    return '<div class="res-card"><div class="res-head"><strong>'+esc(lt.titolo)+'</strong><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></div><p class="small muted">'+dataOraPren(p)+'</p></div>';
   }).join('') : '<p class="small muted">Nessuna prenotazione recente.</p>';
 }
 $('#profilo-form').addEventListener('submit',function(e){
@@ -2518,7 +2656,7 @@ function adminEliminaLibri(ids){
 function adminPrenotazioniHTML(){
   var rows=PRENOTAZIONI.slice().sort(function(a,b){return tsMillis(b.createdAt)-tsMillis(a.createdAt);}).map(function(p){
     var b=libro(p.libroId);var lt=b?libroTesto(b.libroTestoId):null;if(!lt)return '';
-    return '<tr><td>'+esc(lt.titolo)+'</td><td>'+esc(utenteNomeByUid(p.acquirente))+'</td><td>'+esc(utenteNomeByUid(p.venditore))+'</td><td>'+fmtDate(p.data)+' · '+p.ora+'</td><td><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></td></tr>';
+    return '<tr><td>'+esc(lt.titolo)+'</td><td>'+esc(utenteNomeByUid(p.acquirente))+'</td><td>'+esc(utenteNomeByUid(p.venditore))+'</td><td>'+dataOraPren(p)+'</td><td><span class="badge '+p.stato+'">'+esc(STATO_PREN_LABEL[p.stato])+'</span></td></tr>';
   }).join('');
   return '<div class="table-wrap"><table><thead><tr><th>Libro</th><th>Acquirente</th><th>Venditore</th><th>Data</th><th>Stato</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" style="text-align:center;padding:2rem">Nessuna prenotazione.</td></tr>')+'</tbody></table></div>';
 }
