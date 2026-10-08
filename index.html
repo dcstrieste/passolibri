@@ -1089,8 +1089,7 @@ function avvisaRichiedentiViaEmail(lt){
     var u=UTENTI_BY_UID[r.utente];
     if(!u || !u.email || giaAvvisati[u.email])return;
     giaAvvisati[u.email]=true;
-    inviaEmail(u.email,'Il libro che hai richiesto è disponibile! — Mercatino Libri',
-      '<p>Il libro «'+esc(lt.titolo)+'»'+(lt.isbn?' (ISBN '+esc(lt.isbn)+')':'')+' che avevi richiesto è stato appena pubblicato sul Mercatino Libri.</p><p>Vai nel Catalogo per vederlo e prenotarlo.</p>');
+    inviaEmail(u.email,'libro_disponibile',{titolo:lt.titolo});
   });
 }
 function segnaRichiestaSoddisfatta(richiestaId,libroId){
@@ -1141,7 +1140,7 @@ function notificaSegnalazioneChange(ch,opts){
     if(opts.notifyAdded){
       toast('🆘 Nuova segnalazione ricevuta (categoria: '+esc(s.categoria)+').','warn');
       ADMIN_WHITELIST.forEach(function(email){
-        inviaEmail(email,'Nuova segnalazione sul Mercatino Libri','<p>Categoria: '+esc(s.categoria)+'.</p><p>Da: '+esc(utenteNomeByUid(s.utente))+'.</p><p>Vai nell\'Area Admin per gestirla.</p>');
+        inviaEmail(email,'nuova_segnalazione',{});
       });
     }
   }else if(ch.type==='modified'){
@@ -1187,18 +1186,21 @@ function toast(msg,type){
    collegata al proprio SMTP.
    ============================================================ */
 // Dopo aver pubblicato lo script Google Apps Script, incolla qui l'URL che termina con /exec
-var NOTIFY_URL = 'https://script.google.com/macros/s/AKfycbxeDdS0_c7hR_BGm-P7R79IyV7ntgxkZz_mESYrxRYDewE5B2Gq9JaJ3K3loKVAwlXU7g/exec';
+var NOTIFY_URL = 'https://script.google.com/macros/s/AKfycbxk7jyWL_3JysKIE1yMUBTB_MDqEORSzcCVPu736PzmSUew6C2BuR64K922UoaRo49yAQ/exec';
 function inviaEmail(to,tipo,dati){
-  if(!to || !NOTIFY_URL || !auth.currentUser)return;
-  dati=dati||{};
+  if(!to || !NOTIFY_URL || !auth.currentUser){console.warn('inviaEmail: parametri mancanti',{to:to,url:!!NOTIFY_URL,user:!!auth.currentUser});return;}
+  var d=dati||{};
   auth.currentUser.getIdToken().then(function(token){
     return fetch(NOTIFY_URL,{
       method:'POST',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify({token:token,to:to,tipo:tipo,titolo:dati.titolo||'',nome:dati.nome||''})
+      body:JSON.stringify({token:token,to:to,tipo:tipo,titolo:d.titolo||'',nome:d.nome||''})
     });
   }).then(function(r){return r.text();}).then(function(t){
-    try{var j=JSON.parse(t);if(!j.ok)console.error('invio email non riuscito:',j.error);}catch(e){}
+    var j=null;try{j=JSON.parse(t);}catch(e){}
+    if(!j)console.error('invio email: risposta non valida dallo script (controlla la distribuzione di Apps Script, deve essere accessibile a "Chiunque"):',String(t).slice(0,300));
+    else if(!j.ok)console.error('invio email non riuscito:',j.error);
+    else console.log('invio email ok →',to);
   }).catch(function(err){console.error('invio email non riuscito',err);});
 }
 function openModal(id){$('#'+id).classList.add('open');}
@@ -1881,8 +1883,7 @@ function openPrenotaModal(b){
       // Email inviata subito da chi prenota (sempre online in questo momento): non dipende
       // dal fatto che il venditore abbia il sito aperto, quindi arriva sempre.
       var venditore=UTENTI_BY_UID[b.venditore];
-      if(venditore&&venditore.email)inviaEmail(venditore.email,'Nuova prenotazione sul Mercatino Libri',
-        '<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ha prenotato «'+esc(lt.titolo)+'».</p><p>Vai su «Prenotazioni ricevute» sul sito per confermare l\'appuntamento.</p>');
+      if(venditore&&venditore.email)inviaEmail(venditore.email,'nuova_prenotazione',{titolo:lt.titolo,nome:utenteNomeSoloByUid(currentUser.uid)});
     }).catch(function(err){submitBtn.disabled=false;toast('Errore: '+err.message,'warn');});
   });
   $('#btn-richiedi-date').addEventListener('click',function(){
@@ -1908,8 +1909,7 @@ function openPrenotaModal(b){
           toast('Richiesta inviata! Il venditore potrà accettare una delle tue date o proporne altre.','success');
           showView('prenotazioni');
           var venditore=UTENTI_BY_UID[b.venditore];
-          if(venditore&&venditore.email)inviaEmail(venditore.email,'Richiesta di altre date sul Mercatino Libri',
-            '<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ha prenotato «'+esc(lt.titolo)+'» ma ti chiede altre date.</p><p>Vai su «Prenotazioni ricevute» per accettarne una o proporne di diverse.</p>');
+          if(venditore&&venditore.email)inviaEmail(venditore.email,'richiesta_date',{titolo:lt.titolo,nome:utenteNomeSoloByUid(currentUser.uid)});
         });
       }
     });
@@ -1956,7 +1956,7 @@ function accettaSlotPren(id,i){
   return colPrenotazioni.doc(id).update({data:sl.data,ora:sl.ora,stato:'confermato',appuntamentoConfermato:true,negoziazione:FieldValue.delete()}).then(function(){
     toast('Data accettata: appuntamento confermato per '+slotLabel(sl)+'.','success');
     var altro=UTENTI_BY_UID[(ruoloInPren(p)==='acquirente')?p.venditore:p.acquirente];
-    if(altro&&altro.email)inviaEmail(altro.email,'Appuntamento confermato — Mercatino Libri','<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ha accettato la data proposta per «'+esc(titoloPren(p))+'»: <strong>'+esc(slotLabel(sl))+'</strong>.</p>');
+    if(altro&&altro.email)inviaEmail(altro.email,'date_accettate',{titolo:titoloPren(p),nome:utenteNomeSoloByUid(currentUser.uid)+' ('+slotLabel(sl)+')'});
   });
 }
 function controproponiPren(id){
@@ -1969,7 +1969,7 @@ function controproponiPren(id){
       return colPrenotazioni.doc(id).update({stato:'richiesta',negoziazione:{da:ruoloInPren(p),proposte:slots,aggiornatoIl:Date.now()}}).then(function(){
         toast('Proposta inviata.','success');
         var altro=UTENTI_BY_UID[(ruoloInPren(p)==='acquirente')?p.venditore:p.acquirente];
-        if(altro&&altro.email)inviaEmail(altro.email,'Nuove date proposte — Mercatino Libri','<p>'+esc(utenteNomeSoloByUid(currentUser.uid))+' ti ha proposto nuove date per «'+esc(titoloPren(p))+'».</p><p>Accedi al sito, sezione «Prenotazioni», per accettarne una o rispondere.</p>');
+        if(altro&&altro.email)inviaEmail(altro.email,'nuove_date',{titolo:titoloPren(p),nome:utenteNomeSoloByUid(currentUser.uid)});
       });
     }
   });
@@ -2153,7 +2153,7 @@ function eseguiAnnullaAnnuncio(id,motivo,dettaglio){
       var acquirente=UTENTI_BY_UID[pren.acquirente];
       if(acquirente&&acquirente.email){
         var lt=libroTesto(libro(id)?libro(id).libroTestoId:null);
-        inviaEmail(acquirente.email,'Prenotazione annullata — Mercatino Libri','<p>Il venditore ha annullato l\'annuncio'+(lt?' di «'+esc(lt.titolo)+'»':'')+', quindi la tua prenotazione è stata annullata automaticamente.</p>');
+        inviaEmail(acquirente.email,'prenotazione_annullata',{titolo:lt?lt.titolo:'un libro'});
       }
     }
   });
@@ -2203,7 +2203,7 @@ function eseguiAnnullaVendita(id,motivo,dettaglio){
       var acquirente=UTENTI_BY_UID[pren.acquirente];
       if(acquirente&&acquirente.email){
         var lt=libroTesto(libro(id)?libro(id).libroTestoId:null);
-        inviaEmail(acquirente.email,'Vendita annullata — Mercatino Libri','<p>Il venditore ha annullato la vendita'+(lt?' di «'+esc(lt.titolo)+'»':'')+'.</p>');
+        inviaEmail(acquirente.email,'vendita_annullata',{titolo:lt?lt.titolo:'un libro'});
       }
     }
   });
@@ -2225,7 +2225,7 @@ function mieiAnnunciClick(e){
     var p=PRENOTAZIONI.filter(function(x){return x.id===id;})[0];
     if(p){
       var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null,acquirente=UTENTI_BY_UID[p.acquirente];
-      if(acquirente&&acquirente.email)inviaEmail(acquirente.email,'Appuntamento confermato — Mercatino Libri','<p>Il venditore ha confermato l\'appuntamento per «'+esc(lt?lt.titolo:'un libro')+'».</p>');
+      if(acquirente&&acquirente.email)inviaEmail(acquirente.email,'appuntamento_confermato',{titolo:lt?lt.titolo:'un libro'});
     }
   });
   if(act==='completa-venditore')task=completaScambio(id).then(function(){
@@ -2233,7 +2233,7 @@ function mieiAnnunciClick(e){
     var p=PRENOTAZIONI.filter(function(x){return x.id===id;})[0];
     if(p){
       var b=libro(p.libroId),lt=b?libroTesto(b.libroTestoId):null,acquirente=UTENTI_BY_UID[p.acquirente];
-      if(acquirente&&acquirente.email)inviaEmail(acquirente.email,'Scambio completato — Mercatino Libri','<p>Il venditore ha segnalato come completato lo scambio per «'+esc(lt?lt.titolo:'un libro')+'».</p>');
+      if(acquirente&&acquirente.email)inviaEmail(acquirente.email,'scambio_completato',{titolo:lt?lt.titolo:'un libro'});
     }
   });
   if(act==='elimina-libro'){
